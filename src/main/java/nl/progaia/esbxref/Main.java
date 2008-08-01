@@ -6,6 +6,7 @@ import java.util.List;
 
 import nl.progaia.esbxref.artifact.QueueArtifact;
 import nl.progaia.esbxref.artifact.TopicArtifact;
+import nl.progaia.esbxref.ui.MainFrame;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -47,7 +48,7 @@ public class Main implements Runnable, IArtifactNotificationListener {
 				graph = analyzeStorage(storage);
 				domain.cleanup();
 				
-//				graph.save(graphFile);
+				graph.save(graphFile);
 //				System.out.println("Saved to file: " + graphFile.getAbsolutePath());
 			} else {
 				System.out.println("Loading from file: " + graphFile.getAbsolutePath());
@@ -58,6 +59,10 @@ public class Main implements Runnable, IArtifactNotificationListener {
 			System.out.println("Dumped to html");
 			graph.dumpToCSVFile(new File("deps.csv"));
 			System.out.println("Dumped to csv");
+			
+			MainFrame frame = new MainFrame(graph);
+			frame.pack();
+			frame.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

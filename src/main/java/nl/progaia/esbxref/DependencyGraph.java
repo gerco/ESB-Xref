@@ -11,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -86,10 +87,17 @@ public class DependencyGraph implements Serializable {
 	}
 	
 	/**
-	 * Get an artifact from the graph
+	 * Get a Node from the graph
 	 */
-	public Node getArtifact(String path) {
+	public Node getNode(String path) {
 		return nodes.get(path);
+	}	
+	
+	/**
+	 * Get all nodes from the graph
+	 */
+	public Collection<Node> getAllNodes() {
+		return Collections.unmodifiableCollection(nodes.values());
 	}	
 	
 	/**

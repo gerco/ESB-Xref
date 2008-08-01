@@ -118,7 +118,7 @@ public class Node implements Comparable<Node>, Serializable {
 	
 	@Override
 	public String toString() {
-		return getPath();
+		return getName();
 	}
 
 	public int compareTo(Node other) {
