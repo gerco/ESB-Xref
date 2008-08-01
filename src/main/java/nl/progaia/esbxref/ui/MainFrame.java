@@ -55,12 +55,8 @@ public class MainFrame extends JFrame {
 			for(String component: pathComponents) {
 				if(component.length() == 0)
 					continue;
-				
-				System.out.println("C " + component);
-				
-				
+								
 				for(int i=0; i<parent.getChildCount(); i++) {
-					System.out.println("N " + parent.getChildAt(i).toString());
 					if(parent.getChildAt(i).toString().equals(component)) {
 						parent = (DefaultMutableTreeNode) parent.getChildAt(i);
 						continue processPathComponents;
@@ -68,7 +64,6 @@ public class MainFrame extends JFrame {
 				}
 				
 				// Not found, create
-				System.out.println("Creating new node " + component);
 				DefaultMutableTreeNode newParent = new DefaultMutableTreeNode(
 						component.equals(pathComponents[pathComponents.length-1]) ? n : component);
 				parent.add(newParent);
