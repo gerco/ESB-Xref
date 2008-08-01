@@ -2,6 +2,8 @@ package nl.progaia.esbxref;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.sonicsw.deploy.IArtifact;
@@ -18,7 +20,7 @@ public class Node implements Comparable<Node>, Serializable {
 	public Node(IArtifact artifact) {
 		super();
 		name = artifact.getName();
-		path = artifact.getPath();
+		path = artifact.getArchivePath();
 	}
 
 	public String getName() {
@@ -40,9 +42,7 @@ public class Node implements Comparable<Node>, Serializable {
 	}
 	
 	public List<Node> getIUse() {
-//		Collections.sort(iUse);
-//		return Collections.unmodifiableList(iUse);
-		return iUse;
+		return Collections.unmodifiableList(iUse);
 	}
 
 	public void addUsedBy(Node other) {
@@ -56,16 +56,11 @@ public class Node implements Comparable<Node>, Serializable {
 	}
 	
 	public List<Node> getUsedBy() {
-//		Collections.sort(usedBy);
-//		return Collections.unmodifiableList(usedBy);
-		return usedBy;
+		return Collections.unmodifiableList(usedBy);
 	}
 	
 	public boolean uses(Node other) {
-		if(iUse.contains(other))
-			return true;
-
-		return usesIndirect(other);
+		return iUse.contains(other) || usesIndirect(other);
 	}
 	
 	public boolean usesIndirect(Node other) {
@@ -78,10 +73,7 @@ public class Node implements Comparable<Node>, Serializable {
 	}
 	
 	public boolean usedBy(Node other) {
-		if(usedBy.contains(other))
-			return true;
-
-		return usedByIndirect(other);
+		return usedBy.contains(other) || usedByIndirect(other);
 	}
 	
 	public boolean usedByIndirect(Node other) {
@@ -91,6 +83,26 @@ public class Node implements Comparable<Node>, Serializable {
 		}
 		
 		return false;
+	}
+	
+	public void compressLinks() {
+		// Compress uses links
+		for(Iterator<Node> it = iUse.iterator(); it.hasNext();) {
+			Node directlyLinkedNode = it.next();
+			
+			if(usesIndirect(directlyLinkedNode)) {
+				it.remove();
+			}
+		}
+		
+		// Compress usedby links
+		for(Iterator<Node> it = usedBy.iterator(); it.hasNext();) {
+			Node directlyLinkedNode = it.next();
+			
+			if(usedByIndirect(directlyLinkedNode)) {
+				it.remove();
+			}
+		}
 	}
 	
 	@Override

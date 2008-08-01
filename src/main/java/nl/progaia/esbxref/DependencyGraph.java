@@ -11,24 +11,18 @@ import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
 import com.sonicsw.deploy.IArtifact;
-import com.sonicsw.deploy.IArtifactNotificationEvent;
-import com.sonicsw.deploy.IArtifactNotificationListener;
-import com.sonicsw.deploy.IArtifactStorage;
 import com.sonicsw.deploy.artifact.ESBArtifact;
-import com.sonicsw.deploy.tools.common.ExportPropertiesArtifact;
-import com.sonicsw.deploy.traversal.TraverserFactory;
 
-public class DependencyGraph implements IArtifactNotificationListener, Serializable {
+public class DependencyGraph implements Serializable {
 	public static final long serialVersionUID = 1;
 	
 	private final HashMap<String, Node> nodes = new HashMap<String, Node>();
-	private transient List<IArtifact> analyzed;
 	
 	/**
 	 * Add an artifact to the graph without dependencies
@@ -40,31 +34,24 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 	}
 	
 	private Node addArtifactInternal(IArtifact artifact) {
-		if(nodes.containsKey(artifact.getPath()))
-			return nodes.get(artifact.getPath());
+		if(artifact.isDirectory())
+			return null;
+		
+		if(nodes.containsKey(artifact.getArchivePath()))
+			return nodes.get(artifact.getArchivePath());
 		
 		// If the artifact is a service that belongs with a process, merge the two
-		if(ESBArtifact.SERVICE.getRootDirectory().equals(artifact.getParentPath())) {
-			String processName = ESBArtifact.PROCESS.getRootDirectory() + artifact.getName();
+		if(ESBArtifact.SERVICE.getArchivePath().equals(artifact.getArchiveParentPath())) {
+			String processName = ESBArtifact.PROCESS.getArchivePath() + artifact.getName();
 			if(nodes.containsKey(processName)) {
-				System.out.println("Merged " + artifact.getPath() + " with " + processName);
+//				System.out.println("Merged " + artifact.getPath() + " with " + processName);
 				return nodes.get(processName);
 			}
 		}
-		
-		// If the artifact is a process and the service for that process was already 
-		// created, return that node.
-		if(ESBArtifact.PROCESS.getRootDirectory().equals(artifact.getParentPath())) {
-			String serviceName = ESBArtifact.SERVICE.getRootDirectory() + artifact.getName();
-			if(nodes.containsKey(serviceName)) {
-				System.out.println("Merged " + artifact.getPath() + " with " + serviceName);
-				return nodes.get(serviceName);
-			}
-		}
-		
+				
 //		System.out.println("Adding new artifact: " + artifact.getPath());
 		Node newNode = new Node(artifact);
-		nodes.put(artifact.getPath(), newNode);
+		nodes.put(artifact.getArchivePath(), newNode);
 		return newNode;
 	}
 	
@@ -77,14 +64,16 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 	public void addArtifact(IArtifact artifact, IArtifact[] dependencies) {
 		if(artifact == null)
 			throw new IllegalArgumentException("Artifact must not be null");
+
+		// Don't store directories, they screw up the "unused artifact analysis"
+		if(artifact.isDirectory())
+			return;
 		
 		Node node = addArtifactInternal(artifact);
-		if(node == null)
-			throw new RuntimeException("Node == null after adding to HashMap??");
 		
 		for(IArtifact dep: dependencies) {
 			// Find the node if it already exists, create otherwise
-			Node depNode = nodes.get(dep.getPath());
+			Node depNode = nodes.get(dep.getArchivePath());
 			if(depNode == null) {
 				depNode = addArtifactInternal(dep);
 			}
@@ -101,71 +90,6 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 	 */
 	public Node getArtifact(String path) {
 		return nodes.get(path);
-	}
-	
-	/**
-	 * Analyse the storage for dependencies, starting at root.
-	 * 
-	 * @param storage
-	 * @param root
-	 * @param graph
-	 * @throws Exception
-	 */
-	public void analyse(IArtifactStorage storage, IArtifact root) throws Exception {
-		storage.addNotificationListener(this);
-		
-		analyzed = new ArrayList<IArtifact>();
-		analyzed.add(root);
-		addArtifact(root);
-		
-		IArtifact[] as = traverseArtifacts(storage, root);
-		System.out.println(as.length + " artifacts to analyze");
-		for(IArtifact a: as) {
-			System.out.println("Analyzing " + a.getPath());
-			analyseInternal(storage, a);
-		}
-		printStats();
-		compressLinks();
-		printStats();
-	}
-
-	private void analyseInternal(IArtifactStorage storage, IArtifact root) throws Exception {
-		if(analyzed.contains(root))
-			return;
-		
-		analyzed.add(root);
-		
-		IArtifact[] dependencies = traverseArtifacts(storage, root);
-		addArtifact(root, dependencies);
-		
-		for(IArtifact a: dependencies) {
-			// If the artifact not a directory, the traverser will already have analyzed
-			// it's dependencies and they are already included here. Do not traverse that
-			// artifact again.
-			//
-			// On the other hand... we do want the direct dependencies of every artifact,
-			// not just those of the top level artifacts, or else there wouldn't be much
-			// to compress for compressLinks()
-//			if(!a.isDirectory())
-//				analyzed.add(a);
-			
-			analyseInternal(storage, a);
-		}
-	}	
-	
-	private static IArtifact[] traverseArtifacts(IArtifactStorage storage, IArtifact root) throws Exception {
-        TraversalContext context = new TraversalContext(storage, ExportPropertiesArtifact.DEFAULT_IGNORE);
-        context.setTraverseCompressed(false);
-        
-        TraverserFactory.createTraverser(root).traverse(context);
-
-        return context.completeTraversal();
-//        m_errors = context.getErrored();
-        
-//		return SearchAction.search(
-//				storage, 
-//				ExportPropertiesArtifact.DEFAULT_IGNORE, 
-//				TraverserFactory.createTraverser(root));
 	}	
 	
 	/**
@@ -173,27 +97,7 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 	 */
 	public void compressLinks() {
 		for(Node n: nodes.values()) {
-//			System.out.println("Scanning " + n.getPath() + " for indirect links");
-			
-			// Compress uses links
-			for(Iterator<Node> it = n.getIUse().iterator(); it.hasNext();) {
-				Node directlyLinkedNode = it.next();
-				
-				if(n.usesIndirect(directlyLinkedNode)) {
-//					System.out.println("Removing link between " + n + " and " + directlyLinkedNode);
-					it.remove();
-				}
-			}
-			
-			// Compress usedby links
-			for(Iterator<Node> it = n.getUsedBy().iterator(); it.hasNext();) {
-				Node directlyLinkedNode = it.next();
-				
-				if(n.usedByIndirect(directlyLinkedNode)) {
-//					System.out.println("Removing link between " + n + " and " + directlyLinkedNode);
-					it.remove();
-				}
-			}
+			n.compressLinks();
 		}
 	}
 
@@ -237,12 +141,12 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 			Node n = nodes.get(path);
 			
 			w.println("<h3>Uses</h3>");
-			for(Node dep: n.getIUse()) {
+			for(Node dep: sortList(n.getIUse())) {
 				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
 			}
 			
 			w.println("<h3>Used by</h3>");
-			for(Node dep: n.getUsedBy()) {
+			for(Node dep: sortList(n.getUsedBy())) {
 				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
 			}
 		}
@@ -266,18 +170,24 @@ public class DependencyGraph implements IArtifactNotificationListener, Serializa
 		
 		w.close();
 	}
-
-	public void notifyMessage(IArtifactNotificationEvent event) {
-		// Ignore
-	}
 	
+	@SuppressWarnings("unchecked")
+	private static <T extends Comparable> List<T> sortList(List<T> list) {
+		List<T> newList = new ArrayList<T>(list);
+		Collections.sort(newList);
+		return newList;
+	}
+
 	public void printStats() {
 		int numLinks = 0;
+		int numOrphans = 0;
 		
 		for(Node n: nodes.values()) {
 			numLinks += n.getIUse().size() + n.getUsedBy().size();
+			if(n.getUsedBy().size() == 0)
+				numOrphans++;
 		}
 		
-		System.out.println(nodes.size() + " nodes with " + numLinks + " links");
+		System.out.println(nodes.size() + " nodes with " + numLinks + " links. " + numOrphans + " nodes unused.");
 	}	
 }
