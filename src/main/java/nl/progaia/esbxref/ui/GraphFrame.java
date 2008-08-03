@@ -11,7 +11,7 @@ import javax.swing.tree.DefaultTreeModel;
 import nl.progaia.esbxref.DependencyGraph;
 import nl.progaia.esbxref.Node;
 
-public class MainFrame extends JFrame {
+public class GraphFrame extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -20,7 +20,7 @@ public class MainFrame extends JFrame {
 	private DefaultTreeModel treeModel;
 	private JTree artifactTree;
 	
-	public MainFrame(DependencyGraph graph) {
+	public GraphFrame(DependencyGraph graph) {
 		super("Sonic ESB Cross Reference Tool");
 		this.graph = graph;
 		initComponents();
