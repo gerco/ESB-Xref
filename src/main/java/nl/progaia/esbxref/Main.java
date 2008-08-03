@@ -6,7 +6,7 @@ import java.util.List;
 
 import nl.progaia.esbxref.artifact.QueueArtifact;
 import nl.progaia.esbxref.artifact.TopicArtifact;
-import nl.progaia.esbxref.ui.GraphFrame;
+import nl.progaia.esbxref.dep.DependencyGraph;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -60,9 +60,9 @@ public class Main implements Runnable, IArtifactNotificationListener {
 			graph.dumpToCSVFile(new File("deps.csv"));
 			System.out.println("Dumped to csv");
 			
-			GraphFrame frame = new GraphFrame(graph);
-			frame.pack();
-			frame.setVisible(true);
+//			GraphFrame frame = new GraphFrame(graph);
+//			frame.pack();
+//			frame.setVisible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

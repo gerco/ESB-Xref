@@ -1,30 +1,28 @@
 package nl.progaia.esbxref.ui;
 
+import java.awt.BorderLayout;
 import java.util.TreeSet;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import nl.progaia.esbxref.DependencyGraph;
-import nl.progaia.esbxref.Node;
+import nl.progaia.esbxref.dep.DependencyGraph;
+import nl.progaia.esbxref.dep.Node;
 
-public class GraphFrame extends JFrame {
-	
+public class DepGraphPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private final DependencyGraph graph;
+	private DependencyGraph graph;
 	private DefaultMutableTreeNode rootNode;
 	private DefaultTreeModel treeModel;
 	private JTree artifactTree;
 	
-	public GraphFrame(DependencyGraph graph) {
-		super("Sonic ESB Cross Reference Tool");
-		this.graph = graph;
+	public DepGraphPanel() {
+		setLayout(new BorderLayout());
 		initComponents();
-		fillTree();
 	}
 
 	private void initComponents() {
@@ -37,10 +35,13 @@ public class GraphFrame extends JFrame {
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		getContentPane().add(scrollPane);
+		add(scrollPane);
 	}
 	
-	private void fillTree() {
+	public void setDependencyGraph(DependencyGraph graph) {
+		this.graph = graph;
+		
+		rootNode.removeAllChildren();
 		TreeSet<Node> sortedSet = new TreeSet<Node>();
 		sortedSet.addAll(graph.getAllNodes());
 
@@ -70,5 +71,11 @@ public class GraphFrame extends JFrame {
 				parent = newParent;
 			}
 		}
+		
+		treeModel.reload();
+	}
+	
+	public DependencyGraph getDependencyGraph() {
+		return graph;
 	}
 }

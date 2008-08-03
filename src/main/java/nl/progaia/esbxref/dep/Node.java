@@ -1,4 +1,4 @@
-package nl.progaia.esbxref;
+package nl.progaia.esbxref.dep;
 
 import java.io.Serializable;
 import java.util.ArrayList;
