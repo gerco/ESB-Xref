@@ -145,7 +145,7 @@ public class MainFrame extends JFrame {
 		return menuBar;
 	}
 	
-	public void analyzeDomain() {
+	protected void analyzeDomain() {
 		Task t = new AnalyzeDomainTask("Domain1", "localhost:2506", "Administrator", "Administrator");
 		t.addListener(new EventListener<TaskEvent>() {
 			public void processEvent(final TaskEvent event) {

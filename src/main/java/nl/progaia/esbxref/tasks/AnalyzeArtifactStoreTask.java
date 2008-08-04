@@ -66,6 +66,10 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 			// Skip .svn files in SonicFS
 			if("SonicFS".equals(a.getDisplayType()) && a.getName().contains("/.svn/"))
 				continue;
+
+			// Ignore .sid files from Sonic Workbench
+			if("SonicFS".equals(a.getDisplayType()) && a.getName().endsWith(".sid"))
+				continue;
 			
 			analyzeInternal(getStorage(), a, graph);
 			if(canceled) break;
