@@ -6,13 +6,21 @@ import java.util.TreeSet;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 
 import nl.progaia.esbxref.dep.DependencyGraph;
 import nl.progaia.esbxref.dep.Node;
 
 public class DepGraphPanel extends JPanel {
+	public interface DepGraphSelectionListener {
+		public void nodeSelected(Node selectedNode);
+	}
+
 	private static final long serialVersionUID = 1L;
 	
 	private DependencyGraph graph;
@@ -20,16 +28,46 @@ public class DepGraphPanel extends JPanel {
 	private DefaultTreeModel treeModel;
 	private JTree artifactTree;
 	
+	private DepGraphSelectionListener selectionListener;
+	
 	public DepGraphPanel() {
 		setLayout(new BorderLayout());
+		
+		// Set up a dummy selectionListener
+		selectionListener = new DepGraphSelectionListener() {
+			public void nodeSelected(Node selectedNode) {
+				System.out.println("Node " + selectedNode + " selected, but no-one cared!");
+			}
+		};
+		
 		initComponents();
 	}
 
 	private void initComponents() {
 		rootNode = new DefaultMutableTreeNode("Configured objects");
 		treeModel = new DefaultTreeModel(rootNode);
+		
 		artifactTree = new JTree(treeModel);
 		artifactTree.setRootVisible(true);
+		artifactTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		
+		
+		artifactTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
+			public void valueChanged(TreeSelectionEvent e) {
+				TreePath selectedPath = e.getPath();
+				if(selectedPath != null) {
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selectedPath.getLastPathComponent();
+					Object userObject = selectedNode.getUserObject();
+					
+					if(userObject instanceof Node) {
+						selectionListener.nodeSelected((Node)userObject);
+						return;
+					}
+				}
+				
+				selectionListener.nodeSelected(null);
+			}
+		});
 		
 		JScrollPane scrollPane = new JScrollPane(artifactTree,
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -77,5 +115,13 @@ public class DepGraphPanel extends JPanel {
 	
 	public DependencyGraph getDependencyGraph() {
 		return graph;
+	}
+
+	public void setSelectionListener(DepGraphSelectionListener selectionListener) {
+		this.selectionListener = selectionListener;
+	}
+
+	public DepGraphSelectionListener getSelectionListener() {
+		return selectionListener;
 	}
 }

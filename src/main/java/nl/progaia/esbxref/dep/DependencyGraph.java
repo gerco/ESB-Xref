@@ -199,4 +199,53 @@ public class DependencyGraph implements Serializable {
 		
 		System.out.println(nodes.size() + " nodes with " + numLinks + " links. " + numOrphans + " nodes unused.");
 	}	
+	
+	/**
+	 * Finds all nodes that aren't being used by any other node.
+	 * 
+	 * @return
+	 */
+	public List<Node> findUnused() {
+		List<Node> result = new ArrayList<Node>();
+		
+		for(Node n: getAllNodes()) {
+			if(n.getUsedBy().size()==0)
+				result.add(n);
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Find all nodes that aren't being used by any other node and also the
+	 * dependent nodes that aren't being used by any node that is being used.
+	 * 
+	 * @return
+	 */
+	public List<Node> findAllUnused() {
+		List<Node> result = findUnused();
+		
+		return findAllUnused(result);
+	}
+		
+	/**
+	 * Find all nodes that are only used by other nodes in the unused nodes list.
+	 * 
+	 * @return A List<Node> with all unused nodes and their exclusive dependencies.
+	 */
+	public List<Node> findAllUnused(List<Node> unusedNodes) {
+		List<Node> result = new ArrayList<Node>(unusedNodes);
+		
+		for(Node n: nodes.values()) {
+			if(unusedNodes.containsAll(n.getUsedBy())) {
+				result.add(n);
+			}
+		}
+		
+		if(result.size() == unusedNodes.size()) {
+			return result;
+		} else {
+			return findAllUnused(result);
+		}
+	}
 }

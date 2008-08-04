@@ -17,6 +17,7 @@ import com.sonicsw.deploy.IArtifactNotificationEvent;
 import com.sonicsw.deploy.IArtifactNotificationListener;
 import com.sonicsw.deploy.IArtifactStorage;
 import com.sonicsw.deploy.artifact.ESBArtifact;
+import com.sonicsw.deploy.artifact.RootArtifact;
 import com.sonicsw.deploy.tools.common.ExportPropertiesArtifact;
 import com.sonicsw.deploy.traversal.TraverserContext;
 import com.sonicsw.deploy.traversal.TraverserFactory;
@@ -41,21 +42,30 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 
 		// Start by adding the root element to the analyzed list. This prevents infinite loops
 		analyzed = new ArrayList<IArtifact>();
-		analyzed.add(ESBArtifact.ROOT);
-		graph.addArtifact(ESBArtifact.ROOT);
+		analyzed.add(RootArtifact.ROOT);
+		graph.addArtifact(RootArtifact.ROOT);
 
 		// How many artifacts do we need to analyze?
-		IArtifact[] as = traverseArtifacts(getStorage(), ESBArtifact.ROOT);
+		IArtifact[] as = traverseArtifacts(getStorage(), RootArtifact.ROOT);
 		artifactsToAnalyze = as.length;
 		int currentArtifact = 0;
 		
 		// Report the task as started, we know the number of items to analyze now
 		super.dispatchTaskStarted();
+
+		// Store all artifacts in the graph first
+		for(IArtifact a: as) {
+			graph.addArtifact(a);
+		}
 		
 		// Perform the analysis
 		for(IArtifact a: as) {
 			currentArtifactName = a.getName();
 			reportProgress(currentArtifact++);
+	
+			// Skip .svn files in SonicFS
+			if("SonicFS".equals(a.getDisplayType()) && a.getName().startsWith(".svn"))
+				continue;
 			
 			analyzeInternal(getStorage(), a, graph);
 			if(canceled) break;
@@ -89,7 +99,7 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 	
 	@Override
 	public String getStatus() {
-		return "Analyzing dependencies: " + currentArtifactName;
+		return "Analyzing " + currentArtifactName;
 	}
 	
 	@Override
@@ -97,19 +107,6 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		return "Analyzing dependencies";
 	}
 	
-	/**
-	 * Analyse the storage for dependencies, starting at root.
-	 * 
-	 * @param storage
-	 * @param root
-	 * @param graph
-	 * @throws Exception
-	 */
-	public void analyze(IArtifactStorage storage, IArtifact root, DependencyGraph graph) throws Exception {
-		
-		
-	}
-
 	private void analyzeInternal(IArtifactStorage storage, IArtifact root, DependencyGraph graph) throws Exception {
 		if(analyzed.contains(root))
 			return;
@@ -175,8 +172,18 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 				}
 			}
 			
-			if("TOPIC".equals(endpointType))
-				return new IArtifact[] {new TopicArtifact(destination)};
+			if("TOPIC".equals(endpointType)) {
+				if(destination.startsWith("MULTITOPIC:")) {
+					String[] topicNames = destination.substring(11).split("\\|\\|");
+					ArrayList<IArtifact> topicArtifacts = new ArrayList<IArtifact>();
+					for(String name: topicNames) {
+						topicArtifacts.add(new TopicArtifact(name));
+					}
+					return topicArtifacts.toArray(new IArtifact[0]);
+				} else {
+					return new IArtifact[] {new TopicArtifact(destination)};
+				}
+			}
 			
 			if("QUEUE".equals(endpointType))
 				return new IArtifact[] {new QueueArtifact(destination)};			

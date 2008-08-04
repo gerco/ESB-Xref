@@ -4,20 +4,29 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JSplitPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import nl.progaia.esbxref.dep.DependencyGraph;
+import nl.progaia.esbxref.dep.Node;
 import nl.progaia.esbxref.events.EventListener;
 import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
 import nl.progaia.esbxref.task.TaskExecutor;
 import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
+import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
 import nl.progaia.esbxref.ui.status.JStatusBar;
 
 public class MainFrame extends JFrame {
@@ -25,6 +34,8 @@ public class MainFrame extends JFrame {
 	private static final long serialVersionUID = 5472232300765455080L;
 	
 	private DepGraphPanel graphPanel;
+	private XRefResultsPanel resultsPanel;
+	
 	private JStatusBar statusBar;
 	private final TaskExecutor worker;
 	
@@ -41,25 +52,43 @@ public class MainFrame extends JFrame {
 
 	private void initComponents() {
 		getContentPane().setLayout(new BorderLayout());
-		initMenuBar();
-		initDepGraphView();
-		initStatusBar();
+		setJMenuBar(initMenuBar());
+		
+		JSplitPane splitPane = new JSplitPane();
+		splitPane.setLeftComponent(initDepGraphView());
+		splitPane.setRightComponent(initResultsPanel());
+		getContentPane().add(splitPane, BorderLayout.CENTER);
+		
+		getContentPane().add(initStatusBar(), BorderLayout.SOUTH);
 	}
 
-	private void initDepGraphView() {
+	private XRefResultsPanel initResultsPanel() {
+		resultsPanel = new XRefResultsPanel();
+		return resultsPanel;
+	}
+
+	private DepGraphPanel initDepGraphView() {
 		graphPanel = new DepGraphPanel();
-		getContentPane().add(graphPanel, BorderLayout.CENTER);
+		graphPanel.setSelectionListener(new DepGraphSelectionListener() {
+			public void nodeSelected(Node selectedNode) {
+				if(resultsPanel != null)
+					resultsPanel.setDisplayedNode(selectedNode);
+			}
+		});
+		return graphPanel;
 	}
 
-	private void initStatusBar() {
-		statusBar = new JStatusBar(); 
-		getContentPane().add(statusBar, BorderLayout.SOUTH);
+	private JStatusBar initStatusBar() {
+		statusBar = new JStatusBar();
+		return statusBar;
 	}
 
-	private void initMenuBar() {
+	private JMenuBar initMenuBar() {
 		JMenuBar menuBar = new JMenuBar();
 		
 		JMenu fileMenu = new JMenu("File");
+		JMenu analyzeMenu = new JMenu("Analyze");
+		
 		JMenuItem analyzeDomainItem = new JMenuItem("Analyze domain...");
 		analyzeDomainItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -95,18 +124,25 @@ public class MainFrame extends JFrame {
 			}
 		});
 		
-		// Assemble the menu
-		fileMenu.add(analyzeDomainItem);
-		fileMenu.add(analyzeXARItem);
-		fileMenu.insertSeparator(2);
+		// Assemble the file menu
 		fileMenu.add(saveAnalysisItem);
 		fileMenu.add(loadAnalysisItem);
+		fileMenu.insertSeparator(2);
+		fileMenu.add(new JMenuItem("Export to CSV"));
+		fileMenu.add(new JMenuItem("Export to HTML"));
 		fileMenu.insertSeparator(5);
 		fileMenu.add(quitItem);
 		
-		menuBar.add(fileMenu);
+		// Assemble the Analyze menu
+		analyzeMenu.add(analyzeDomainItem);		
+		analyzeMenu.add(analyzeXARItem);
+		analyzeMenu.insertSeparator(2);
+		analyzeMenu.add(new JMenuItem("Find unused artifacts"));
 		
-		setJMenuBar(menuBar);
+		menuBar.add(fileMenu);
+		menuBar.add(analyzeMenu);
+		
+		return menuBar;
 	}
 	
 	public void analyzeDomain() {
@@ -139,13 +175,83 @@ public class MainFrame extends JFrame {
 	}
 	
 	protected void saveAnalysis() {
-		// TODO Auto-generated method stub
+		JFileChooser chooser = new JFileChooser();
+		chooser.showSaveDialog(this);
 		
+		if(chooser.getSelectedFile() != null) {
+			final File file = chooser.getSelectedFile();
+			final DependencyGraph graph = graphPanel.getDependencyGraph();
+			
+			worker.execute(new Task() {
+				@Override
+				public void execute() throws Exception {
+					FileOutputStream fout = new FileOutputStream(file);
+					ObjectOutputStream oos = new ObjectOutputStream(fout);
+					oos.writeObject(graph);
+					fout.flush();
+					fout.close();
+				}
+				
+				@Override
+				public String toString() {
+					return "Saving " + file.getAbsolutePath();
+				}
+			});
+		}
 	}
 	
 	protected void loadAnalysis() {
-		// TODO Auto-generated method stub
+		JFileChooser chooser = new JFileChooser();
+		chooser.showOpenDialog(this);
 		
+		if(chooser.getSelectedFile() == null)
+			return;
+
+		final File file = chooser.getSelectedFile();
+		
+		Task t = new Task() {
+			private DependencyGraph graph;
+			
+			@Override
+			public void execute() throws Exception {
+				FileInputStream fin = new FileInputStream(file);
+				ObjectInputStream oin = new ObjectInputStream(fin);				
+				graph = (DependencyGraph) oin.readObject();
+				fin.close();
+			}
+			
+			@Override
+			protected Object getInfo() {
+				return graph;
+			}
+			
+			@Override
+			public String toString() {
+				return "Loading " + file.getAbsolutePath();
+			}
+		};
+		
+		t.addListener(new EventListener<TaskEvent>() {
+			public void processEvent(final TaskEvent event) {
+				switch(event.getId()) {
+				
+				case TASK_ERROR:
+					((Task)event.getSource()).removeListener(this);
+					break;
+					
+				case TASK_FINISHED:
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+						}
+					});
+					break;
+					
+				}
+			}
+		});
+
+		worker.execute(t);
 	}
 	
 	protected void quit() {
@@ -154,7 +260,6 @@ public class MainFrame extends JFrame {
 	}
 	
 	private class StatusBarManipulator implements EventListener<TaskEvent> {
-
 		private boolean taskError = false;
 		
 		public void processEvent(final TaskEvent event) {	
