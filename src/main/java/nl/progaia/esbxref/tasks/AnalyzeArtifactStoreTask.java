@@ -64,7 +64,7 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 			reportProgress(currentArtifact++);
 	
 			// Skip .svn files in SonicFS
-			if("SonicFS".equals(a.getDisplayType()) && a.getName().startsWith(".svn"))
+			if("SonicFS".equals(a.getDisplayType()) && a.getName().contains("/.svn/"))
 				continue;
 			
 			analyzeInternal(getStorage(), a, graph);
