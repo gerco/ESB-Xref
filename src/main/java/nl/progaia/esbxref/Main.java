@@ -16,6 +16,7 @@ import com.sonicsw.deploy.IArtifact;
 import com.sonicsw.deploy.IArtifactNotificationEvent;
 import com.sonicsw.deploy.IArtifactNotificationListener;
 import com.sonicsw.deploy.IArtifactStorage;
+import com.sonicsw.deploy.action.SearchAction;
 import com.sonicsw.deploy.artifact.ESBArtifact;
 import com.sonicsw.deploy.tools.common.ExportPropertiesArtifact;
 import com.sonicsw.deploy.traversal.TraverserFactory;
@@ -182,16 +183,10 @@ public class Main implements Runnable, IArtifactNotificationListener {
 	}
 
 	private static IArtifact[] traverseArtifacts(IArtifactStorage storage, IArtifact root) throws Exception {
-		try {
-	        TraversalContext context = new TraversalContext(storage, ExportPropertiesArtifact.DEFAULT_IGNORE);
-	        context.setTraverseCompressed(false);
-	        
-	        TraverserFactory.createTraverser(root).traverse(context);
-	
-	        return context.completeTraversal();
-		} catch (UnsupportedOperationException e) {
-			return new IArtifact[0];
-		}
+		return SearchAction.search(
+				storage, 
+				ExportPropertiesArtifact.DEFAULT_IGNORE, 
+				TraverserFactory.createTraverser(root));
 	}
 
 	public void notifyMessage(IArtifactNotificationEvent arg0) {

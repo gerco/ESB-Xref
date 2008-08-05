@@ -46,7 +46,7 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		graph.addArtifact(RootArtifact.ROOT);
 
 		// How many artifacts do we need to analyze?
-		IArtifact[] as = traverseArtifacts(getStorage(), RootArtifact.ROOT);
+		IArtifact[] as = traverseArtifacts(getStorage(), ESBArtifact.ROOT);
 		artifactsToAnalyze = as.length;
 		int currentArtifact = 0;
 		
