@@ -17,14 +17,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
-
 import com.sonicsw.deploy.IArtifact;
-import com.sonicsw.deploy.artifact.ESBArtifact;
 
 public class DependencyGraph implements Serializable {
 	public static final long serialVersionUID = 1;
 	
-	private final HashMap<String, Node> nodes = new HashMap<String, Node>();
+	/**
+	 * Holds the graph itself, key=path, value=INode
+	 */
+	private final HashMap<String, INode> nodes;
+	
+	/**
+	 * The root node of the graph. It is not included in the graph itself because
+	 * that would screw up the findUnused() analysis.
+	 */
+	private final INode rootNode;
+	
+	public DependencyGraph() {
+		nodes = new HashMap<String, INode>();
+		rootNode = new RootNode();
+	}
 	
 	/**
 	 * Add an artifact to the graph without dependencies
@@ -35,24 +47,15 @@ public class DependencyGraph implements Serializable {
 		addArtifactInternal(artifact);
 	}
 	
-	private Node addArtifactInternal(IArtifact artifact) {
+	private INode addArtifactInternal(IArtifact artifact) {
 		if(artifact.isDirectory())
 			return null;
 		
 		if(nodes.containsKey(artifact.getArchivePath()))
 			return nodes.get(artifact.getArchivePath());
-		
-		// If the artifact is a service that belongs with a process, merge the two
-		if(ESBArtifact.SERVICE.getArchivePath().equals(artifact.getArchiveParentPath())) {
-			String processName = ESBArtifact.PROCESS.getArchivePath() + artifact.getName();
-			if(nodes.containsKey(processName)) {
-//				System.out.println("Merged " + artifact.getPath() + " with " + processName);
-				return nodes.get(processName);
-			}
-		}
-				
+						
 //		System.out.println("Adding new artifact: " + artifact.getPath());
-		Node newNode = new Node(artifact);
+		INode newNode = new ArtifactNode(artifact);
 		nodes.put(artifact.getArchivePath(), newNode);
 		return newNode;
 	}
@@ -71,11 +74,11 @@ public class DependencyGraph implements Serializable {
 		if(artifact.isDirectory())
 			return;
 		
-		Node node = addArtifactInternal(artifact);
+		INode node = addArtifactInternal(artifact);
 		
 		for(IArtifact dep: dependencies) {
 			// Find the node if it already exists, create otherwise
-			Node depNode = nodes.get(dep.getArchivePath());
+			INode depNode = nodes.get(dep.getArchivePath());
 			if(depNode == null) {
 				depNode = addArtifactInternal(dep);
 			}
@@ -90,22 +93,36 @@ public class DependencyGraph implements Serializable {
 	/**
 	 * Get a Node from the graph
 	 */
-	public Node getNode(String path) {
+	public INode getNode(String path) {
 		return nodes.get(path);
 	}	
 	
 	/**
 	 * Get all nodes from the graph
 	 */
-	public Collection<Node> getAllNodes() {
+	public Collection<INode> getAllNodes() {
 		return Collections.unmodifiableCollection(nodes.values());
 	}	
+
+	public void setTopLevel(String path, boolean topLevel) {
+		INode node = getNode(path);
+		if(node == null)
+			throw new IllegalArgumentException("Path " + path + " does not exist in the graph");
+		
+		if(topLevel) {
+			rootNode.addIUse(node);
+			node.addUsedBy(rootNode);
+		} else {
+			rootNode.removeIUse(node);
+			node.removeUsedBy(rootNode);
+		}
+	}
 	
 	/**
 	 * Remove all direct links between nodes that are also indirectly linked.
 	 */
 	public void compressLinks() {
-		for(Node n: nodes.values()) {
+		for(INode n: nodes.values()) {
 			n.compressLinks();
 		}
 	}
@@ -147,15 +164,15 @@ public class DependencyGraph implements Serializable {
 		for(String path: nodes.keySet()) {
 			w.println("<h2><a name=\"" + path.replace('/', '_') + "\">" + path + "</a></h2>");
 
-			Node n = nodes.get(path);
+			INode n = nodes.get(path);
 			
 			w.println("<h3>Uses</h3>");
-			for(Node dep: sortList(n.getIUse())) {
+			for(INode dep: sortList(n.getIUse())) {
 				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
 			}
 			
 			w.println("<h3>Used by</h3>");
-			for(Node dep: sortList(n.getUsedBy())) {
+			for(INode dep: sortList(n.getUsedBy())) {
 				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
 			}
 		}
@@ -169,7 +186,7 @@ public class DependencyGraph implements Serializable {
 		PrintWriter w = new PrintWriter(new FileWriter(file));
 
 		for(String path: nodes.keySet()) {
-			for(Node n: nodes.get(path).getIUse()) {
+			for(INode n: nodes.get(path).getIUse()) {
 				w.print(path);
 				w.print(";");
 				w.print(n.getPath());
@@ -191,7 +208,7 @@ public class DependencyGraph implements Serializable {
 		int numLinks = 0;
 		int numOrphans = 0;
 		
-		for(Node n: nodes.values()) {
+		for(INode n: nodes.values()) {
 			numLinks += n.getIUse().size() + n.getUsedBy().size();
 			if(n.getUsedBy().size() == 0)
 				numOrphans++;
@@ -201,14 +218,15 @@ public class DependencyGraph implements Serializable {
 	}	
 	
 	/**
-	 * Finds all nodes that aren't being used by any other node.
+	 * Finds all nodes that aren't being used by any other node. Except for top level
+	 * nodes.
 	 * 
 	 * @return
 	 */
-	public List<Node> findUnused() {
-		List<Node> result = new ArrayList<Node>();
+	public List<INode> findUnused() {
+		List<INode> result = new ArrayList<INode>();
 		
-		for(Node n: getAllNodes()) {
+		for(INode n: getAllNodes()) {
 			if(n.getUsedBy().size()==0)
 				result.add(n);
 		}
@@ -222,9 +240,9 @@ public class DependencyGraph implements Serializable {
 	 * 
 	 * @return
 	 */
-	public List<Node> findAllUnused() {
-		List<Node> result = findUnused();
-		
+	public List<INode> findAllUnused() {
+		List<INode> result = findUnused();
+				
 		return findAllUnused(result);
 	}
 		
@@ -233,10 +251,14 @@ public class DependencyGraph implements Serializable {
 	 * 
 	 * @return A List<Node> with all unused nodes and their exclusive dependencies.
 	 */
-	public List<Node> findAllUnused(List<Node> unusedNodes) {
-		List<Node> result = new ArrayList<Node>(unusedNodes);
+	public List<INode> findAllUnused(List<INode> unusedNodes) {
+		System.out.println("Unused nodes: " + unusedNodes);
+		List<INode> result = new ArrayList<INode>(unusedNodes);
 		
-		for(Node n: nodes.values()) {
+		for(INode n: nodes.values()) {
+			if(result.contains(n))
+				continue;
+			
 			if(unusedNodes.containsAll(n.getUsedBy())) {
 				result.add(n);
 			}

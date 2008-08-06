@@ -126,6 +126,16 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		System.arraycopy(travDeps, 0, dependencies, 0, travDeps.length);
 		System.arraycopy(deepDeps, 0, dependencies, travDeps.length, deepDeps.length);
 			
+		// If the artifact is a service that belongs with a process, merge the two by
+		// replacing 'root' with the process artifact but specifying the dependencies
+		// of the original service artifact.
+		if(ESBArtifact.SERVICE.getArchivePath().equals(root.getArchiveParentPath())) {
+			String processPath = ESBArtifact.PROCESS.getArchivePath() + root.getName();
+			if(graph.getNode(processPath) != null) {
+				root = new ESBArtifact(ESBArtifact.PROCESS, root.getName());
+			}
+		}
+		
 		// Add the artifact to the graph and link the dependencies accordingly
 		graph.addArtifact(root, dependencies);
 		

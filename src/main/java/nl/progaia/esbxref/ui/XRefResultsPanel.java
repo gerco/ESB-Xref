@@ -7,7 +7,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
-import nl.progaia.esbxref.dep.Node;
+import nl.progaia.esbxref.dep.INode;
 
 public class XRefResultsPanel extends JPanel {
 
@@ -42,7 +42,7 @@ public class XRefResultsPanel extends JPanel {
 		add(tabbedPane, BorderLayout.CENTER);
 	}
 	
-	public void setDisplayedNode(Node displayedNode) {
+	public void setDisplayedNode(INode displayedNode) {
 		if(displayedNode != null) {
 			usesTableModel.setData(displayedNode.getIUse());
 			whereUsedTableModel.setData(displayedNode.getUsedBy());
@@ -52,7 +52,7 @@ public class XRefResultsPanel extends JPanel {
 		}
 	}
 	
-	private class NodeListTableModel extends ListTableModel<Node> {
+	private class NodeListTableModel extends ListTableModel<INode> {
 
 		public NodeListTableModel() {
 			columnNames = new String[] {"Name"};
@@ -60,7 +60,7 @@ public class XRefResultsPanel extends JPanel {
 		}
 		
 		@Override
-		public Object getColumnValue(Node item, int columnIndex) {
+		public Object getColumnValue(INode item, int columnIndex) {
 			switch(columnIndex) {
 			case 0:
 				return item.getPath();

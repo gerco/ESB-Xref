@@ -26,7 +26,7 @@ public class TestDependencyGraph {
 		IArtifact a = new QueueArtifact("someQueue");
 		graph.addArtifact(a);
 		
-		Node n = graph.getNode(a.getArchivePath());
+		INode n = graph.getNode(a.getArchivePath());
 		
 		assertNotNull(n);
 		assertEquals(n.getPath(), a.getArchivePath());
@@ -42,9 +42,9 @@ public class TestDependencyGraph {
 		
 		graph.addArtifact(a, new IArtifact[] {b, c});
 		
-		Node na = graph.getNode(a.getArchivePath());
-		Node nb = graph.getNode(b.getArchivePath());
-		Node nc = graph.getNode(c.getArchivePath());
+		INode na = graph.getNode(a.getArchivePath());
+		INode nb = graph.getNode(b.getArchivePath());
+		INode nc = graph.getNode(c.getArchivePath());
 		
 		assertNotNull(na);
 		assertEquals(na.getPath(), a.getArchivePath());
@@ -73,13 +73,13 @@ public class TestDependencyGraph {
 		
 		graph.addArtifact(a, new IArtifact[] {b, c});
 		
-		Node na = graph.getNode(a.getArchivePath());
-		Node nb = graph.getNode(b.getArchivePath());
-		Node nc = graph.getNode(c.getArchivePath());
+		INode na = graph.getNode(a.getArchivePath());
+		INode nb = graph.getNode(b.getArchivePath());
+		INode nc = graph.getNode(c.getArchivePath());
 		
-		Collection<Node> nodes = graph.getAllNodes();
+		Collection<INode> nodes = graph.getAllNodes();
 		assertNotNull(nodes);
-		assertTrue(nodes.size() == 3);
+		assertEquals(3, nodes.size());
 		assertTrue(nodes.contains(na));
 		assertTrue(nodes.contains(nb));
 		assertTrue(nodes.contains(nc));
@@ -100,13 +100,13 @@ public class TestDependencyGraph {
 		
 		graph = DependencyGraph.load(file);
 		
-		Node na = graph.getNode(a.getArchivePath());
-		Node nb = graph.getNode(b.getArchivePath());
-		Node nc = graph.getNode(c.getArchivePath());
+		INode na = graph.getNode(a.getArchivePath());
+		INode nb = graph.getNode(b.getArchivePath());
+		INode nc = graph.getNode(c.getArchivePath());
 		
-		Collection<Node> nodes = graph.getAllNodes();
+		Collection<INode> nodes = graph.getAllNodes();
 		assertNotNull(nodes);
-		assertTrue(nodes.size() == 3);
+		assertEquals(3, nodes.size());
 		assertTrue(nodes.contains(na));
 		assertTrue(nodes.contains(nb));
 		assertTrue(nodes.contains(nc));
@@ -125,20 +125,34 @@ public class TestDependencyGraph {
 		graph.addArtifact(a, new IArtifact[] {b, c});
 		graph.addArtifact(d, new IArtifact[] {e});
 		
-		List<Node> unusedNodes = graph.findUnused();
-		assertEquals(unusedNodes.size(), 2);
+		List<INode> unusedNodes = graph.findUnused();
+		assertEquals(2, unusedNodes.size());
 		assertTrue(unusedNodes.contains(graph.getNode(a.getArchivePath())));
 		assertTrue(unusedNodes.contains(graph.getNode(d.getArchivePath())));
 	}
 
 	@Test
 	public void testFindAllUnused() {
-		fail("Not yet implemented");
+		DependencyGraph graph = new DependencyGraph();
+		
+		IArtifact a = new QueueArtifact("artifacta");
+		IArtifact b = new QueueArtifact("artifactb");
+		IArtifact c = new QueueArtifact("artifactc");
+		IArtifact d = new QueueArtifact("artifactd");
+		IArtifact e = new QueueArtifact("artifacte");
+		
+		graph.addArtifact(a, new IArtifact[] {b, c});
+		graph.addArtifact(d, new IArtifact[] {e});
+		
+		List<INode> unusedNodes = graph.findAllUnused();
+		assertEquals(5, unusedNodes.size());
+		
+		graph.setTopLevel(b.getArchivePath(), true);
+		graph.setTopLevel(d.getArchivePath(), true);
+		unusedNodes = graph.findAllUnused();
+		
+		assertEquals(2, unusedNodes.size());
+		assertTrue(unusedNodes.contains(graph.getNode(a.getArchivePath())));
+		assertTrue(unusedNodes.contains(graph.getNode(c.getArchivePath())));
 	}
-
-	@Test
-	public void testFindAllUnusedListOfNode() {
-		fail("Not yet implemented");
-	}
-	
 }

@@ -14,11 +14,12 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import nl.progaia.esbxref.dep.DependencyGraph;
-import nl.progaia.esbxref.dep.Node;
+import nl.progaia.esbxref.dep.ArtifactNode;
+import nl.progaia.esbxref.dep.INode;
 
 public class DepGraphPanel extends JPanel {
 	public interface DepGraphSelectionListener {
-		public void nodeSelected(Node selectedNode);
+		public void nodeSelected(INode selectedNode);
 	}
 
 	private static final long serialVersionUID = 1L;
@@ -35,7 +36,7 @@ public class DepGraphPanel extends JPanel {
 		
 		// Set up a dummy selectionListener
 		selectionListener = new DepGraphSelectionListener() {
-			public void nodeSelected(Node selectedNode) {
+			public void nodeSelected(INode selectedNode) {
 				System.out.println("Node " + selectedNode + " selected, but no-one cared!");
 			}
 		};
@@ -59,8 +60,8 @@ public class DepGraphPanel extends JPanel {
 					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)selectedPath.getLastPathComponent();
 					Object userObject = selectedNode.getUserObject();
 					
-					if(userObject instanceof Node) {
-						selectionListener.nodeSelected((Node)userObject);
+					if(userObject instanceof ArtifactNode) {
+						selectionListener.nodeSelected((INode)userObject);
 						return;
 					}
 				}
@@ -80,10 +81,10 @@ public class DepGraphPanel extends JPanel {
 		this.graph = graph;
 		
 		rootNode.removeAllChildren();
-		TreeSet<Node> sortedSet = new TreeSet<Node>();
+		TreeSet<INode> sortedSet = new TreeSet<INode>();
 		sortedSet.addAll(graph.getAllNodes());
 
-		for(Node n: sortedSet) {
+		for(INode n: sortedSet) {
 //			DefaultMutableTreeNode node = new DefaultMutableTreeNode(n);
 			
 			DefaultMutableTreeNode parent = rootNode;

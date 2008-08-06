@@ -7,26 +7,26 @@ import org.junit.Test;
 
 import com.sonicsw.deploy.IArtifact;
 
-public class TestNode {
+public class TestArtifactNode {
 
 	@Test
 	public void testNode() {
 		IArtifact a = new QueueArtifact("artifactName");
-		Node n = new Node(a);
+		INode n = new ArtifactNode(a);
 		assertEquals(a.getArchivePath(), n.getPath());
 	}
 
 	@Test
 	public void testGetName() {
 		IArtifact a = new QueueArtifact("artifactName");
-		Node n = new Node(a);
+		INode n = new ArtifactNode(a);
 		assertEquals(a.getName(), n.getName());
 	}
 
 	@Test
 	public void testGetPath() {
 		IArtifact a = new QueueArtifact("artifactName");
-		Node n = new Node(a);
+		INode n = new ArtifactNode(a);
 		assertEquals(a.getArchivePath(), n.getPath());
 	}
 
@@ -35,8 +35,8 @@ public class TestNode {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
+		INode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
 		
 		assertEquals(na.getIUse().size(), 0);
 		na.addIUse(nb);
@@ -53,8 +53,8 @@ public class TestNode {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependingArtifact");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
+		INode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
 		
 		assertEquals(na.getUsedBy().size(), 0);
 		na.addUsedBy(nb);
@@ -71,8 +71,8 @@ public class TestNode {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
+		INode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
 		
 		na.addIUse(nb);
 		assertTrue(na.uses(nb));
@@ -85,9 +85,9 @@ public class TestNode {
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		IArtifact c = new QueueArtifact("dependantArtifact2");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
-		Node nc = new Node(c);
+		INode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
+		ArtifactNode nc = new ArtifactNode(c);
 		
 		na.addIUse(nb);
 		nb.addIUse(nc);
@@ -104,8 +104,8 @@ public class TestNode {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
+		ArtifactNode na = new ArtifactNode(a);
+		INode nb = new ArtifactNode(b);
 		
 		nb.addUsedBy(na);
 		assertTrue(nb.usedBy(na));
@@ -118,9 +118,9 @@ public class TestNode {
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		IArtifact c = new QueueArtifact("dependantArtifact2");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
-		Node nc = new Node(c);
+		ArtifactNode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
+		INode nc = new ArtifactNode(c);
 		
 		nb.addUsedBy(na);
 		nc.addUsedBy(nb);
@@ -138,9 +138,9 @@ public class TestNode {
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		IArtifact c = new QueueArtifact("dependantArtifact2");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
-		Node nc = new Node(c);
+		INode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
+		ArtifactNode nc = new ArtifactNode(c);
 		
 		na.addIUse(nb);
 		na.addIUse(nc);
@@ -163,7 +163,7 @@ public class TestNode {
 	@Test
 	public void testToString() {
 		IArtifact a = new QueueArtifact("artifactName");
-		Node n = new Node(a);
+		INode n = new ArtifactNode(a);
 		assertEquals(n.toString(), a.getName());
 	}
 
@@ -172,8 +172,8 @@ public class TestNode {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		
-		Node na = new Node(a);
-		Node nb = new Node(b);
+		ArtifactNode na = new ArtifactNode(a);
+		ArtifactNode nb = new ArtifactNode(b);
 		
 		assertEquals(na.compareTo(nb), a.getArchivePath().compareTo(b.getArchivePath()));
 	}

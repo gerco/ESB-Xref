@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import nl.progaia.esbxref.dep.DependencyGraph;
-import nl.progaia.esbxref.dep.Node;
+import nl.progaia.esbxref.dep.INode;
 import nl.progaia.esbxref.events.EventListener;
 import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
@@ -70,7 +70,7 @@ public class MainFrame extends JFrame {
 	private DepGraphPanel initDepGraphView() {
 		graphPanel = new DepGraphPanel();
 		graphPanel.setSelectionListener(new DepGraphSelectionListener() {
-			public void nodeSelected(Node selectedNode) {
+			public void nodeSelected(INode selectedNode) {
 				if(resultsPanel != null)
 					resultsPanel.setDisplayedNode(selectedNode);
 			}
