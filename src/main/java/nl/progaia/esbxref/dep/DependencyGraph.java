@@ -108,6 +108,12 @@ public class DependencyGraph implements Serializable {
 		INode node = getNode(path);
 		if(node == null)
 			throw new IllegalArgumentException("Path " + path + " does not exist in the graph");
+		setTopLevel(node, topLevel);
+	}
+	
+	public void setTopLevel(INode node, boolean topLevel) {
+		if(node == null)
+			throw new IllegalArgumentException("Node must not be null");
 		
 		if(topLevel) {
 			rootNode.addIUse(node);
@@ -252,7 +258,7 @@ public class DependencyGraph implements Serializable {
 	 * @return A List<Node> with all unused nodes and their exclusive dependencies.
 	 */
 	public List<INode> findAllUnused(List<INode> unusedNodes) {
-		System.out.println("Unused nodes: " + unusedNodes);
+//		System.out.println("Unused nodes: " + unusedNodes);
 		List<INode> result = new ArrayList<INode>(unusedNodes);
 		
 		for(INode n: nodes.values()) {

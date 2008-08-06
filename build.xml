@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     6 aug 2008 13:57:31                                                        
+
+     project    
+     description
+                   
+     Gerco                                                                
+     ====================================================================== -->
+<project name="project" default="jar">
+    <description>
+            description
+    </description>
+
+    <!-- ================================= 
+          target: jar              
+         ================================= -->
+    <target name="jar" description="--> jar">
+ 		<jar destfile="esbxref.jar">
+ 			<fileset dir="target/classes" includes="nl/progaia/esbxref/launcher/**"/>
+ 			<manifest>
+ 				<attribute name="Main-Class" value="nl.progaia.esbxref.launcher.Launcher"/>
+ 			</manifest>
+    	</jar>
+ 		<jar destfile="esbxref-core.jar">
+ 			<fileset dir="target/classes" excludes="nl/progaia/esbxref/launcher/**"/>
+    	</jar>
+    </target>
+	
+	<target name="dist" description="make dist">
+		<zip destfile="esbxref.zip">
+			<fileset file="esbxref.jar"/>
+			<fileset file="esbxref-core.jar"/>
+			<fileset file="MFUtils-1.0-SNAPSHOT.jar"/>
+		</zip>
+	</target>
+
+</project>

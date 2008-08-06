@@ -26,8 +26,12 @@ import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
 import nl.progaia.esbxref.task.TaskExecutor;
 import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
+import nl.progaia.esbxref.tasks.UnusedArtifactReportTask;
 import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
 import nl.progaia.esbxref.ui.status.JStatusBar;
+
+import com.sonicsw.deploy.tools.gui.common.DomainConnectionDialog;
+import com.sonicsw.deploy.tools.gui.common.DomainConnectionModel;
 
 public class MainFrame extends JFrame {
 
@@ -44,6 +48,7 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		initComponents();
+		setLocationByPlatform(true);
 		
 		worker.addListener(new TaskEventListener(this));
 		worker.addListener(new StatusBarManipulator());
@@ -102,6 +107,7 @@ public class MainFrame extends JFrame {
 				analyzeXAR();
 			}
 		});
+		analyzeXARItem.setEnabled(false);
 		
 		JMenuItem saveAnalysisItem = new JMenuItem("Save analysis");
 		saveAnalysisItem.addActionListener(new ActionListener() {
@@ -117,6 +123,13 @@ public class MainFrame extends JFrame {
 			}
 		});
 		
+		JMenuItem findUnusedItem = new JMenuItem("Find unused artifacts");
+		findUnusedItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				findUnused();
+			}
+		});
+		
 		JMenuItem quitItem = new JMenuItem("Quit");
 		quitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -124,12 +137,18 @@ public class MainFrame extends JFrame {
 			}
 		});
 		
+		JMenuItem exportToCSVItem = new JMenuItem("Export to CSV");
+		exportToCSVItem.setEnabled(false);
+		
+		JMenuItem exportToHTMLItem = new JMenuItem("Export to HTML");
+		exportToHTMLItem.setEnabled(false);
+		
 		// Assemble the file menu
 		fileMenu.add(saveAnalysisItem);
 		fileMenu.add(loadAnalysisItem);
 		fileMenu.insertSeparator(2);
-		fileMenu.add(new JMenuItem("Export to CSV"));
-		fileMenu.add(new JMenuItem("Export to HTML"));
+		fileMenu.add(exportToCSVItem);
+		fileMenu.add(exportToHTMLItem);
 		fileMenu.insertSeparator(5);
 		fileMenu.add(quitItem);
 		
@@ -137,7 +156,7 @@ public class MainFrame extends JFrame {
 		analyzeMenu.add(analyzeDomainItem);		
 		analyzeMenu.add(analyzeXARItem);
 		analyzeMenu.insertSeparator(2);
-		analyzeMenu.add(new JMenuItem("Find unused artifacts"));
+		analyzeMenu.add(findUnusedItem);
 		
 		menuBar.add(fileMenu);
 		menuBar.add(analyzeMenu);
@@ -146,7 +165,12 @@ public class MainFrame extends JFrame {
 	}
 	
 	protected void analyzeDomain() {
-		Task t = new AnalyzeDomainTask("Domain1", "localhost:2506", "Administrator", "Administrator");
+		DomainConnectionModel model = getConnectionModel();
+
+		if(model == null)
+			return;
+		
+		Task t = new AnalyzeDomainTask(model);
 		t.addListener(new EventListener<TaskEvent>() {
 			public void processEvent(final TaskEvent event) {
 				switch(event.getId()) {
@@ -167,6 +191,20 @@ public class MainFrame extends JFrame {
 			}
 		});
 		worker.execute(t);
+	}
+	
+	private DomainConnectionModel getConnectionModel() {
+        DomainConnectionDialog dialog;
+        dialog = new DomainConnectionDialog(this);
+        
+//        DomainConnectionModel model = new DomainConnectionModel();
+        dialog.setLocationRelativeTo(this);
+        dialog.pack();
+        dialog.setVisible(true);
+        if(!dialog.isOK())
+            return null;
+        
+        return dialog.getModel();
 	}
 	
 	protected void analyzeXAR() {
@@ -254,11 +292,23 @@ public class MainFrame extends JFrame {
 		worker.execute(t);
 	}
 	
+	protected void findUnused() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.showSaveDialog(this);
+		
+		if(chooser.getSelectedFile() != null) {
+			final File file = chooser.getSelectedFile();
+			final DependencyGraph graph = graphPanel.getDependencyGraph();
+			
+			worker.execute(new UnusedArtifactReportTask(graph, file));
+		}
+	}
+	
 	protected void quit() {
 		dispose();
 		System.exit(0);
 	}
-	
+
 	private class StatusBarManipulator implements EventListener<TaskEvent> {
 		private boolean taskError = false;
 		

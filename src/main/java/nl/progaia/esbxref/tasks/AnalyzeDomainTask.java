@@ -1,5 +1,6 @@
 package nl.progaia.esbxref.tasks;
 
+import com.sonicsw.deploy.tools.gui.common.DomainConnectionModel;
 import com.sonicsw.pso.util.MFUtils;
 
 public class AnalyzeDomainTask extends AnalyzeArtifactStoreTask {
@@ -8,6 +9,13 @@ public class AnalyzeDomainTask extends AnalyzeArtifactStoreTask {
 	private final String url;
 	private final String username;
 	private final String password;
+	
+	public AnalyzeDomainTask(DomainConnectionModel model) {
+		this.domain = model.getDomain();
+		this.url = model.getURL();
+		this.username = model.getUsername();
+		this.password = model.getPassword();
+	}
 	
 	public AnalyzeDomainTask(String domain, String url, String username, String password) {
 		this.domain = domain;
@@ -23,7 +31,7 @@ public class AnalyzeDomainTask extends AnalyzeArtifactStoreTask {
 		setStorage(utils.getDSArtifactStorage());
 		
 		super.execute();
-		
+	
 		utils.cleanup();
 	}
 

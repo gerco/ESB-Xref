@@ -16,7 +16,7 @@ public class Launcher {
 	public final static String PREF_XQ_HOME = "com.sonicsw.xq.home";
 	
 	private final static String[] myJars = new String[] {
-		"esbxref.jar",
+		"esbxref-core.jar",
 		"MFUtils-1.0-SNAPSHOT.jar"
 	};
 	
@@ -135,9 +135,12 @@ public class Launcher {
 	 * @return True when the user confirmed. False when the user canceled launch. 
 	 */
 	private static boolean askUserForHomeLocations() {
-		prefs.put(PREF_MQ_HOME, "D:/Sonic75/MQ7.5");
-		prefs.put(PREF_XQ_HOME, "D:/Sonic75/ESB7.5");
-		return true;
+		SonicLocationsDialog dialog = new SonicLocationsDialog();
+		try {
+			return dialog.askForSonicLocations();
+		} finally {
+			dialog.dispose();
+		}
 	}
 	
 }

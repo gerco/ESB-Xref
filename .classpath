@@ -8,5 +8,6 @@
 	<classpathentry kind="var" path="ESB_LIB/jaxrpc.jar"/>
 	<classpathentry kind="var" path="ESB_LIB/commons-discovery.jar"/>
 	<classpathentry kind="var" path="ESB_LIB/axis.jar"/>
+	<classpathentry kind="lib" path="D:/Sonic75/ESB7.5/lib/sonic_deploy.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
