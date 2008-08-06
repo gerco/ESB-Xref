@@ -3,8 +3,8 @@ package nl.progaia.esbxref.dep;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +20,7 @@ import com.sonicsw.deploy.IArtifact;
 public class TestDependencyGraph {
 
 	@Test
-	public void testAddArtifactIArtifact() {		
+	public void testAddArtifactIArtifact() {
 		DependencyGraph graph = new DependencyGraph();
 		
 		IArtifact a = new QueueArtifact("someQueue");
@@ -63,6 +63,47 @@ public class TestDependencyGraph {
 		assertFalse(nc.uses(nb));
 	}
 
+	@Test
+	public void testMergeNodes() {
+		DependencyGraph graph = new DependencyGraph();
+		
+		IArtifact a = new QueueArtifact("artifacta");
+		IArtifact b = new QueueArtifact("artifactb");
+		IArtifact c = new QueueArtifact("artifactc");
+		IArtifact d = new QueueArtifact("artifactd");
+		IArtifact e = new QueueArtifact("artifacte");
+		
+		graph.addArtifact(a, new IArtifact[] {b, c});
+		graph.addArtifact(d, new IArtifact[] {e});
+
+		INode na = graph.getNode(a.getArchivePath());
+		INode nb = graph.getNode(b.getArchivePath());
+		INode nc = graph.getNode(c.getArchivePath());
+		INode nd = graph.getNode(d.getArchivePath());
+		INode ne = graph.getNode(e.getArchivePath());
+
+		assertFalse(na.uses(ne));
+		assertFalse(ne.usedBy(na));
+		
+		graph.mergeNodes(na, nd);
+		
+		assertTrue(na.uses(nb));
+		assertTrue(na.uses(nc));
+		assertTrue(na.uses(ne));
+		assertTrue(ne.usedBy(na));
+		assertNull(graph.getNode(nd.getPath()));
+		
+		for(INode n: graph.getAllNodes()) {
+			if(n.uses(nd))
+				System.out.println(n + " still uses " + nd);
+			if(n.usedBy(nd))
+				System.out.println(n + " still used by " + nd);
+			
+			assertFalse(n.uses(nd));
+			assertFalse(n.usedBy(nd));
+		}
+	}
+	
 	@Test
 	public void testGetAllNodes() {
 		DependencyGraph graph = new DependencyGraph();

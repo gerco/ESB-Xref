@@ -91,6 +91,41 @@ public class DependencyGraph implements Serializable {
 	}
 	
 	/**
+	 * Merge the two nodes into one, keeping the primary node.
+	 * 
+	 * @param primary
+	 * @param secondary
+	 */
+	public void mergeNodes(INode primary, INode secondary) {
+		// Link all nodes that the secondary node uses to the primary
+		for(INode node: secondary.getIUse()) {
+			// Link the node to the primary node
+			primary.addIUse(node);
+			node.addUsedBy(primary);
+			
+			// Unlink the node from the secondary node
+			node.removeUsedBy(secondary);
+		}
+		
+		// Link all nodes that use the secondary node to the primary
+		for(INode node: secondary.getUsedBy()) {
+			// Link the primary node to the node
+			primary.addUsedBy(node);
+			node.addIUse(primary);
+			
+			// Unlink the secondary node from the node
+			node.removeIUse(secondary);
+		}
+		
+		// Break any links between the primary and secondary node
+		primary.removeIUse(secondary);
+		primary.removeUsedBy(secondary);
+		
+		// Remove the secondary node from the graph
+		nodes.remove(secondary.getPath());
+	}
+	
+	/**
 	 * Get a Node from the graph
 	 */
 	public INode getNode(String path) {
@@ -101,7 +136,8 @@ public class DependencyGraph implements Serializable {
 	 * Get all nodes from the graph
 	 */
 	public Collection<INode> getAllNodes() {
-		return Collections.unmodifiableCollection(nodes.values());
+		return Collections.unmodifiableCollection(
+				new ArrayList<INode>(nodes.values()));
 	}	
 
 	public void setTopLevel(String path, boolean topLevel) {

@@ -14,7 +14,7 @@ public interface INode extends Comparable<INode>{
 
 	public abstract List<INode> getIUse();
 
-	public abstract void addUsedBy(INode other);
+	public abstract void addUsedBy(INode node);
 
 	public abstract boolean removeUsedBy(INode node);
 	

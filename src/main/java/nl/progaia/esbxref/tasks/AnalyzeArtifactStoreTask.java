@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import nl.progaia.esbxref.artifact.QueueArtifact;
 import nl.progaia.esbxref.artifact.TopicArtifact;
 import nl.progaia.esbxref.dep.DependencyGraph;
+import nl.progaia.esbxref.dep.INode;
 import nl.progaia.esbxref.task.CancelableTask;
 import nl.progaia.esbxref.task.Task;
 
@@ -125,7 +126,24 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		IArtifact[] dependencies = new IArtifact[travDeps.length + deepDeps.length];
 		System.arraycopy(travDeps, 0, dependencies, 0, travDeps.length);
 		System.arraycopy(deepDeps, 0, dependencies, travDeps.length, deepDeps.length);
-			
+					
+		// Add the artifact to the graph and link the dependencies accordingly
+		graph.addArtifact(root, dependencies);
+		
+		// Analyze the dependencies themselves
+		for(IArtifact a: dependencies) {
+			analyzeInternal(storage, a, graph);
+		}
+		
+		// Now merge /ESB/Service/processName with /ESB/Process/processName
+		for(INode n: graph.getAllNodes()) {
+			if(n.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
+				INode serviceNode = 
+					graph.getNode(ESBArtifact.PROCESS.getArchivePath() + n.getName());
+				graph.mergeNodes(n, serviceNode);
+			}
+		}
+		
 		// If the artifact is a service that belongs with a process, merge the two by
 		// replacing 'root' with the process artifact but specifying the dependencies
 		// of the original service artifact.
@@ -134,14 +152,6 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 			if(graph.getNode(processPath) != null) {
 				root = new ESBArtifact(ESBArtifact.PROCESS, root.getName());
 			}
-		}
-		
-		// Add the artifact to the graph and link the dependencies accordingly
-		graph.addArtifact(root, dependencies);
-		
-		// Analyze the dependencies themselves
-		for(IArtifact a: dependencies) {
-			analyzeInternal(storage, a, graph);
 		}
 	}	
 	
@@ -199,8 +209,14 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 				}
 			}
 			
-			if("QUEUE".equals(endpointType))
-				return new IArtifact[] {new QueueArtifact(destination)};			
+			if("QUEUE".equals(endpointType)) {
+				if(destination.contains("::")) {
+					return new IArtifact[] {new QueueArtifact(
+							destination.substring(destination.indexOf("::") + 2))};
+				} else {
+					return new IArtifact[] {new QueueArtifact(destination)};
+				}
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
