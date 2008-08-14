@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xq="http://www.sonicsw.com/sonicxq" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:element name="wsdlType">
+		<xsd:annotation>
+			<xsd:documentation>Defines a particular wsdl type references a schema</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="url" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

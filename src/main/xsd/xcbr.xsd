@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+	<xs:element name="RoutingRules">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Note"/>
+				<xs:element name="Namespaces" minOccurs="0">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Namespace" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="Prefix" type="xs:NCName"/>
+										<xs:element name="URI" type="xs:string"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element ref="RoutingRule" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element ref="Destinations" minOccurs="0"/>
+			</xs:sequence>
+			<xs:attribute name="xcbrVersion" use="optional" type="xs:string"/>
+			<xs:attribute name="processType" use="optional" type="xs:NCName"/>
+			<xs:attribute name="xcbrEvaluationMode" use="optional" type="xs:NCName"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RoutingRule">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Description"/>
+				<xs:choice>
+					<xs:element ref="DistinctRule"/>
+					<xs:element ref="Operator"/>
+				</xs:choice>
+				<xs:element ref="Destinations"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Description" type="xs:string"/>
+	<xs:element name="Operator">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Type"/>
+				<xs:element ref="DistinctRule" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Note" type="xs:string"/>
+	<xs:element name="Argument">
+		<xs:complexType mixed="true">
+			<xs:attribute name="name" use="required" type="xs:NCName"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Arguments">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Argument" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Type" type="xs:NCName"/>
+	<xs:element name="DistinctRule">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Type"/>
+				<xs:element ref="Arguments"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Destinations">
+		<xs:complexType>
+			<xs:choice>
+				<xs:element ref="RoutingException"/>
+				<xs:element ref="Destination" maxOccurs="unbounded"/>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RoutingException">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Class"/>
+				<xs:element ref="Message"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Class" type="xs:string"/>
+	<xs:element name="Message" type="xs:string"/>
+	<xs:element name="Destination">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Name"/>
+			</xs:sequence>
+			<xs:attribute name="type" use="required" type="xs:NCName"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Name" type="xs:string"/>
+</xs:schema>

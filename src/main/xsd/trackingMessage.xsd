@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xq="http://www.sonicsw.com/sonicxq" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xs:element name="trackingMessageInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="trackingLocation">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="xq:eventLocationType">
+								<xs:attribute name="step" type="xs:string" use="optional"/>
+                <xs:attribute name="destination" type="xs:string" use="optional"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+        <xs:element name="xqMessageHeaders" minOccurs="0" maxOccurs="1"  >
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="header">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="name" type="xs:string" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+			</xs:sequence>
+			<xs:attribute name="id" type="xs:string" use="required"/>
+			<xs:attribute name="event" type="xq:eventType" use="required"/>
+      <xs:attribute name="timestamp" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="eventType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PROCESS_ENTRY"/>
+			<xs:enumeration value="PROCESS_EXIT"/>
+			<xs:enumeration value="SERVICE_ENTRY"/>
+			<xs:enumeration value="SERVICE_EXIT"/>
+			<xs:enumeration value="SERVICE_ERROR"/>
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

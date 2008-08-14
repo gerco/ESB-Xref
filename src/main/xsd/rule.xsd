@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/rule" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:rule="http://www.sonicsw.com/rule" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:simpleType name="endpointRefTypeEnumeration">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="ENDPOINT"/>
+			<xsd:enumeration value="SERVICE"/>
+			<xsd:enumeration value="PROCESS"/>
+			<xsd:enumeration value="REPLY_TO"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="endpointRefType">
+		<xsd:attribute name="endpoint_ref" type="xsd:string" use="required"/>
+		<xsd:attribute name="type" type="rule:endpointRefTypeEnumeration" use="optional" default="ENDPOINT"/>
+	</xsd:complexType>
+	<xsd:element name="ruleSpec">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="helperFile" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:attribute name="url" type="xsd:string" use="required"/>
+					</xsd:complexType>
+				</xsd:element>
+        <xsd:element name="declarations" minOccurs="0" type="xsd:string"/>
+				<xsd:element name="routingRule" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="condition" type="xsd:string" minOccurs="0"/>
+						  <xsd:element name="endpoint" type="rule:endpointRefType"/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

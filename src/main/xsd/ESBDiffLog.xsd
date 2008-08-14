@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq"
+    xmlns:xq="http://www.sonicsw.com/sonicxq"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified"> 
+
+    <xsd:element name="ESBArtifactDiff" type="xq:ArtifactDiffList"/>
+
+    <xsd:complexType name="ArtifactDiffList">
+        <xsd:sequence>
+            <xsd:element name="source" type="xsd:string"/>
+            <xsd:element name="target" type="xsd:string"/>
+            <xsd:element name="date" type="xsd:string"/>
+            <xsd:element name="diffs" type="xq:diffType"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffType">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element name="artifactDiffsVerbose" type="xq:diffVerboseType" minOccurs="0" maxOccurs="1"/>
+                <xsd:element name="artifactDiffsTerse" type="xq:diffTerseType" minOccurs="0" maxOccurs="1"/>
+            </xsd:choice>
+            <xsd:element name="artifactsInSource" type="xq:diffArtifactsMissingType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="artifactsInTarget" type="xq:diffArtifactsMissingType" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffVerboseType">
+        <xsd:sequence>
+           <xsd:element name="xmlArtifactDiff" type="xq:diffXmlArtifactType" minOccurs="0" maxOccurs="unbounded"/>
+           <xsd:element name="textArtifactDiff" type="xq:diffTextArtifactType" minOccurs="0" maxOccurs="unbounded"/>
+           <xsd:element name="binaryArtifactDiff" type="xq:diffBinaryArtifactType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffXmlArtifactType">
+        <xsd:sequence>
+            <xsd:element name="path" type="xsd:string"/>
+            <xsd:element name="source" type="xsd:string"  minOccurs="0" maxOccurs="unbounded"/>
+            <xsd:element name="target" type="xsd:string"  minOccurs="0" maxOccurs="unbounded"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffBinaryArtifactType">
+        <xsd:sequence>
+            <xsd:element name="path" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="byteoffset" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffTextArtifactType">
+        <xsd:sequence>
+            <xsd:element name="path" type="xsd:string"/>
+            <xsd:element name="diffs" type="xq:diffTextType"  minOccurs="0" maxOccurs="unbounded"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffTextType">
+        <xsd:sequence>
+            <xsd:element name="source" type="xq:diffTextDetailType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="target" type="xq:diffTextDetailType" minOccurs="0" maxOccurs="1"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffTextDetailType">
+        <xsd:sequence>
+            <xsd:element name="position" type="xsd:string"/>
+            <xsd:element name="lines" type="xq:diffTextLineType"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffTextLineType">
+        <xsd:sequence>
+            <xsd:element name="line" type="xsd:string"  minOccurs="0" maxOccurs="unbounded"/>
+         </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffTerseType">
+        <xsd:sequence>
+           <xsd:element name="artifactDiff" type="xq:diffArtifactPathType" minOccurs="0" maxOccurs="unbounded"/>
+       </xsd:sequence>
+    </xsd:complexType>
+
+
+    <xsd:complexType name="diffArtifactsMissingType">
+        <xsd:sequence>
+           <xsd:element name="artifactDiff" type="xq:diffArtifactPathType" minOccurs="0" maxOccurs="unbounded"/>
+       </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="diffArtifactPathType">
+        <xsd:sequence>
+            <xsd:element name="path" type="xsd:string"/>
+       </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

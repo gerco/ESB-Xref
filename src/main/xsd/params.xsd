@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xq="http://www.sonicsw.com/sonicxq" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:element name="params">
+		<xsd:annotation>
+			<xsd:documentation>Comment describing your root element</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="xq:paramsType">
+					<xsd:attribute name="name" type="xsd:string" use="required"/>
+					<xsd:attribute name="type_ref" type="xsd:string" use="required"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

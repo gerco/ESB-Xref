@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/ESBTailorRules.xsd" />
+
+	<xsd:element name="TailoringMaps" type="xq:TailoringMapsType" />
+
+	<xsd:simpleType name="qosType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="BEST_EFFORT" />
+			<xsd:enumeration value="AT_LEAST_ONCE" />
+			<xsd:enumeration value="EXACTLY_ONCE" />
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="TailoringMapsType">
+		<xsd:sequence>
+			<xsd:element name="ProcessMaps" type="xq:ProcessMapsType" />
+			<xsd:element name="ServiceMaps" type="xq:ServiceMapsType" />
+			<xsd:element name="EndpointMaps" type="xq:EndpointMapsType" />
+			<xsd:element name="ConnectionMaps" type="xq:ConnectionMapsType" />
+			<xsd:element name="StringReplaceMaps" type="xq:StringReplaceMapsType" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="ProcessMapsType">
+		<xsd:sequence>
+			<xsd:element name="ProcessMap" type="xq:ProcessMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ServiceMapsType">
+		<xsd:sequence>
+			<xsd:element name="ServiceMap" type="xq:ServiceMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ConnectionMapsType">
+		<xsd:sequence>
+			<xsd:element name="ConnectionMap" type="xq:ConnectionMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="EndpointMapsType">
+		<xsd:sequence>
+			<xsd:element name="EndpointMap" type="xq:EndpointMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ProcessMapType" mixed="true">
+		<xsd:sequence>
+			<xsd:element name="faultEndpoint" type="xq:endpointRefMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="rejectEndpoint" type="xq:endpointRefMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="trackingDetailsEndpoint" type="xq:endpointRefMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="exitEndpoints" type="xq:exitEndpointsMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="steps" type="xq:itineraryStepsMapType" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="QoS" type="xq:qosType" use="optional" />
+		<xsd:attribute name="timeToLive" type="xsd:integer" use="optional" />
+		<xsd:attribute name="trackingLevel" type="xsd:int" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="ServiceMapType">
+		<xsd:sequence>
+			<xsd:element name="faultEndpoint" type="xq:endpointRefMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="rejectEndpoint" type="xq:endpointRefMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="exitEndpoints" type="xq:exitEndpointsMapType" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="paramMap" type="xq:ParamsMapType" minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="typeRef" type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="EndpointMapType">
+		<xsd:sequence>
+			<xsd:element name="paramMap" type="xq:ParamsMapType" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="typeRef" type="xsd:string" use="optional" />
+		<xsd:attribute name="QoS" type="xq:qosType" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="ConnectionMapType">
+		<xsd:sequence>
+			<xsd:element name="paramMap" type="xq:ParamsMapType" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required" />
+		<xsd:attribute name="typeRef" type="xsd:string" use="optional" />
+	</xsd:complexType>
+
+	<xsd:complexType name="ParamsMapType">
+		<xsd:choice minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="StringParam">
+				<xsd:complexType>
+					<xsd:simpleContent>
+						<xsd:extension base="xsd:string">
+							<xsd:attribute name="name" type="xsd:string" use="required" />
+							<xsd:attribute name="url" type="xsd:string" use="optional" />
+						</xsd:extension>
+					</xsd:simpleContent>
+				</xsd:complexType>
+			</xsd:element>
+			<xsd:element name="XmlParam">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:any namespace="##any" processContents="lax" minOccurs="0" />
+					</xsd:sequence>
+					<xsd:attribute name="name" type="xsd:string" use="required" />
+					<xsd:attribute name="url" type="xsd:string" use="optional" />
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:complexType name="itineraryStepsMapType">
+		<xsd:sequence>
+			<xsd:element name="steps" type="xq:itineraryStepMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="itineraryStepMapType">
+		<xsd:sequence>
+			<xsd:element name="step" type="xsd:string" />
+			<xsd:element name="stepEndpoint" type="xq:endpointRefMapType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="exitEndpointsMapType">
+		<xsd:sequence>
+			<xsd:element name="exitEndpointMap" type="xq:exitEndpointMapType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="exitEndpointMapType">
+		<xsd:sequence>
+			<xsd:element name="originalValue" type="xq:endpointRefMapType" minOccurs="0" />
+			<xsd:element name="value" type="xq:endpointRefMapType" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="endpointRefMapType">
+		<xsd:attribute name="endpoint_ref" type="xsd:string" use="required" />
+		<xsd:attribute name="type" type="xsd:string" use="optional" />
+	</xsd:complexType>
+	
+</xsd:schema>

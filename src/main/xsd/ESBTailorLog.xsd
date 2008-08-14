@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq"
+    xmlns:xq="http://www.sonicsw.com/sonicxq"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xsd:element name="TailoringLog" type="xq:TailoringList"/>
+
+    <xsd:complexType name="TailoringList">
+        <xsd:sequence>
+            <xsd:element name="updatedArtifacts" type="xq:updatedArtifactsType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="artifactsNotInMap" type="xq:artifactsNotInMapType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="artifactsNotInArchive" type="xq:artifactsNotInArchiveType" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="artifactWarnings" type="xq:artifactWarningsType" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="updatedArtifactsType">
+        <xsd:sequence>
+            <xsd:element name="updatedArtifact" type="xq:updatedArtifactType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="artifactsNotInMapType">
+        <xsd:sequence>
+            <xsd:element name="artifactNotInMap" type="xq:artifactsNotFoundType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="artifactsNotInArchiveType">
+        <xsd:sequence>
+            <xsd:element name="artifactNotInArchive" type="xq:artifactsNotFoundType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="updatedArtifactType">
+        <xsd:sequence>
+           <xsd:element name="name" type="xsd:string"/>
+           <xsd:element name="type" type="xsd:string"/>
+           <xsd:element name="updatedString" type="xq:updatedStringParam"  minOccurs="0" maxOccurs="unbounded"/>
+           <xsd:element name="additionalString" type="xq:additionalStringParam"  minOccurs="0" maxOccurs="unbounded"/>
+           <xsd:element name="updatedXml" type="xq:updatedXmlParam"  minOccurs="0" maxOccurs="unbounded"/>
+           <xsd:element name="additionalXml" type="xq:additionalXmlParam"  minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="updatedStringParam">
+        <xsd:sequence>
+           <xsd:element name="paramName" type="xsd:string"/>
+           <xsd:element name="oldValue" type="xsd:string"/>
+           <xsd:element name="newValue" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="additionalStringParam">
+        <xsd:sequence>
+           <xsd:element name="paramName" type="xsd:string"/>
+           <xsd:element name="newValue" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="updatedXmlParam">
+        <xsd:sequence>
+           <xsd:element name="paramName" type="xsd:string"/>
+           <xsd:element name="oldValue">
+               <xsd:complexType>
+                   <xsd:sequence>
+                       <xsd:any namespace="##any" processContents="lax" minOccurs="0"/>
+                   </xsd:sequence>
+               </xsd:complexType>
+            </xsd:element>
+           <xsd:element name="newValue">
+               <xsd:complexType>
+                   <xsd:sequence>
+                       <xsd:any namespace="##any" processContents="lax" minOccurs="0"/>
+                   </xsd:sequence>
+               </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="additionalXmlParam">
+        <xsd:sequence>
+           <xsd:element name="paramName" type="xsd:string"/>
+           <xsd:element name="newValue">
+               <xsd:complexType>
+                   <xsd:sequence>
+                       <xsd:any namespace="##any" processContents="lax" minOccurs="0"/>
+                   </xsd:sequence>
+               </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="artifactsNotFoundType">
+        <xsd:sequence>
+            <xsd:element name="type" type="xsd:string"/>
+            <xsd:element name="name" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="artifactWarningsType">
+        <xsd:sequence>
+            <xsd:element name="artifactWarning" type="xq:artifactWarningType" minOccurs="0" maxOccurs="unbounded"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+    <xsd:complexType name="artifactWarningType">
+        <xsd:sequence>
+           <xsd:element name="name" type="xsd:string"/>
+           <xsd:element name="type" type="xsd:string"/>
+           <xsd:element name="warning" type="xsd:string"/>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>

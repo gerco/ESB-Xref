@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="wsdlPortType">
+		<xs:annotation>
+			<xs:documentation>Comment describing your root element</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="operations">
+					<xs:complexType>
+						<xs:choice maxOccurs="unbounded">
+							<xs:element name="requestResponse">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="input" type="xq:multipartType"/>
+										<xs:element name="output" type="xq:multipartType"/>
+										<xs:element name="fault_list" minOccurs="0">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="fault" type="xq:partType" maxOccurs="unbounded"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+									<xs:attribute name="name" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="oneway">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="input" type="xq:multipartType"/>
+									</xs:sequence>
+									<xs:attribute name="name" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+			<xs:attribute name="description" type="xs:string" use="optional"/>
+			<xs:attribute name="url" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="multipartType">
+		<xs:sequence>
+			<xs:element name="part_list">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="part" type="xq:partType" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="partType">
+		<xs:attribute name="wsdlTypeName" type="xs:string" use="required"/>
+		<xs:attribute name="declaredTypeName" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:schema>

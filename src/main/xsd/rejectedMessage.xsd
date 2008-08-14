@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xq="http://www.sonicsw.com/sonicxq" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xs:element name="rejectedMessageInfo">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="rejectedCode" type="xs:string"/>
+				<xs:element name="rejectedLocation">
+					<xs:complexType>
+						<xs:complexContent>
+							<xs:extension base="xq:eventLocationType">
+								<xs:attribute name="step" type="xs:string" use="optional"/>
+							</xs:extension>
+						</xs:complexContent>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="rejectedDetails" type="xs:string"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

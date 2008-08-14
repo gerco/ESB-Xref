@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xsd:element name="TailoringRules" type="xq:TailoringRulesType"/>
+
+	<xsd:complexType name="TailoringRulesType">
+		<xsd:sequence>
+			<xsd:element name="DevEnvRules" type="xq:DevEnvMapsType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ServiceRules" type="xq:ServiceRulesType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="EndpointRules" type="xq:EndpointRulesType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ConnectionRules" type="xq:ConnectionRulesType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" fixed="1.0" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:simpleType name="paramTypeEnum">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="STRING"/>
+			<xsd:enumeration value="XML"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="ServiceRulesType">
+		<xsd:sequence>
+			<xsd:element name="ServiceRule" type="xq:RuleType" minOccurs="1" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="EndpointRulesType">
+		<xsd:sequence>
+			<xsd:element name="EndpointRule" type="xq:RuleType" minOccurs="1" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="ConnectionRulesType">
+		<xsd:sequence>
+			<xsd:element name="ConnectionRule" type="xq:RuleType" minOccurs="1" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="RuleType">
+		<xsd:sequence>
+			<xsd:element name="Param" type="xq:RuleParamType" minOccurs="1" maxOccurs="unbounded"/>
+		</xsd:sequence>
+		<xsd:attribute name="type" use="required" type="xsd:string"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="RuleParamType">
+		<xsd:attribute name="name" use="required" type="xsd:string"/>
+		<xsd:attribute name="type" use="optional" default="STRING" type="xq:paramTypeEnum"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="DevEnvMapsType">
+		<xsd:sequence>
+			<xsd:element name="stringReplaceMaps" type="xq:StringReplaceMapsType" />
+			<xsd:element name="DevServiceMaps" type="xq:DevServiceMapsType" />
+			<xsd:element name="DevEndpointMaps" type="xq:DevEndpointMapsType" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="DevEndpointMapsType">
+		<xsd:sequence>
+			<xsd:element name="devEndpointMap" type="xq:DevMappingType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+
+	<xsd:complexType name="DevServiceMapsType">
+		<xsd:sequence>
+			<xsd:element name="devServiceMap" type="xq:DevMappingType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="StringReplaceMapsType">
+		<xsd:sequence>
+			<xsd:element name="stringReplaceMap" type="xq:DevMappingType" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="DevMappingType">
+		<xsd:attribute name="name" use="required" type="xsd:string" />
+		<xsd:attribute name="updatedName" use="required" type="xsd:string" />
+		<xsd:attribute name="order" use="optional" type="xsd:string"/>
+	</xsd:complexType>
+
+</xsd:schema>

@@ -1,0 +1,308 @@
+<?xml version="1.0"?>
+<xsd:schema version="1.0" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:xq="http://www.sonicsw.com/sonicxq" 
+targetNamespace="http://www.sonicsw.com/sonicxq">
+
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+
+	<xsd:complexType name="invocationActionType">
+		<xsd:sequence>
+			<xsd:element name="variables" type="xq:variablesType" minOccurs="0"/>
+			<xsd:element name="parametermap" type="xq:parameterMapType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="nameSpaceType">
+		<xsd:attribute name="prefix" type="xsd:string" use="required"/>
+		<xsd:attribute name="uri" type="xsd:anyURI" use="required"/>
+		<xsd:attribute name="schemaLocation" type="xsd:anyURI" use="optional"/>
+		<xsd:attribute name="isUserDefined" type="xsd:boolean" use="optional"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="nameSpacesType">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="ns" type="xq:nameSpaceType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="variablesType">
+		<xsd:choice maxOccurs="unbounded">
+			<xsd:element name="document" type="xq:valueType"/>
+			<xsd:element name="value" type="xq:valueType"/>
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:complexType name="valueType">
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="type" type="xsd:string"/>
+		<xsd:attribute name="direction" type="xq:directionType"/>
+		<xsd:attribute name="required" type="xsd:boolean" default="true"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterListValueType">
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="displayType" type="xsd:string"/>
+		<xsd:attribute name="baseType" type="xsd:string" use="required"/>
+		<xsd:attribute name="direction" type="xq:parameterDirectionType"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="xpathType">
+		<xsd:sequence>
+			<xsd:element name="xpathExpression" type="xsd:string"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="xsltType">
+		<xsd:sequence>
+			<xsd:element name="stylesheetURL" type="xsd:anyURI"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="translationType">
+		<xsd:choice>
+			<xsd:element name="xslt" type="xq:xsltType"/>
+			<xsd:element name="xpath" type="xq:xpathType"/>
+		</xsd:choice>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterType">
+		<xsd:choice>
+			<xsd:sequence>
+				<xsd:element name="variablename" type="xsd:string" />
+				<xsd:element name="translationtype" type="xq:translationType" minOccurs="0"/>
+			</xsd:sequence>
+			<xsd:element name="value" type="xsd:string"/>
+		</xsd:choice>
+		<xsd:attribute name="parameterName" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterMapType">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="parameter" type="xq:parameterType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="stringExecuteParamType">
+		<xsd:sequence>
+			<xsd:element name="variablename" type="xsd:string"/>
+			<xsd:element name="value" type="xsd:string"/>
+			<xsd:element name="xpath" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="wrap" type="xsd:string" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="valueRefExecuteParamType">
+		<xsd:sequence>
+			<xsd:element name="variablename" type="xsd:string"/>
+			<xsd:element name="value" type="xsd:anyURI"/>
+			<xsd:element name="xpath" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="wrap" type="xsd:string" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="messagePartIndexExecuteParamType">
+		<xsd:sequence>
+			<xsd:element name="variablename" type="xsd:string"/>
+			<xsd:element name="value" type="xsd:integer"/>
+			<xsd:element name="xpath" type="xsd:string" minOccurs="0"/>
+			<xsd:element name="wrap" type="xsd:string" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+   
+   <xsd:complexType name="ElementTargetType" mixed="true">     
+      <xsd:attribute name="remove" type="xsd:boolean" default="false"/>      
+   </xsd:complexType>
+   
+	<xsd:complexType name="extractionType">
+		<xsd:sequence>
+		<xsd:element name="extractionRule" minOccurs="0" maxOccurs="unbounded">
+		<xsd:complexType>
+			<xsd:choice minOccurs="1" maxOccurs="unbounded">
+				<xsd:element name="simpleValue" type="xq:stringExecuteParamType"/>
+				<xsd:element name="valueRef" type="xq:valueRefExecuteParamType"/>
+				<xsd:element name="messagePartIndex" type="xq:messagePartIndexExecuteParamType"/>
+				<xsd:element name="messageContentId" type="xq:stringExecuteParamType"/>
+				<xsd:element name="messageHeaderProperty" type="xq:stringExecuteParamType"/>
+			</xsd:choice>
+			<xsd:attribute name="consume" type="xsd:boolean" default="false"/>
+		</xsd:complexType>
+		</xsd:element>
+		</xsd:sequence>
+		<xsd:attribute name="consumeAll" type="xsd:boolean" default="false"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterListType">
+		<xsd:sequence>
+			<xsd:element name="parameter" minOccurs="0" maxOccurs="unbounded" type="xq:parameterListValueType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="scriptCommandType">
+		<xsd:sequence>
+			<xsd:element name="command" type="xsd:anyType" maxOccurs="unbounded"/>
+			<xsd:element name="parameterList" type="xq:parameterListType" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="scriptType">
+		<xsd:sequence>
+			<xsd:element name="nameSpaces" type="xq:nameSpacesType" minOccurs="0"/>
+			<xsd:element name="invocationAction" type="xq:invocationActionType" minOccurs="0"/>
+			<xsd:element name="parameterConstants" type="xq:parameterConstantsType" minOccurs="0"/>
+			<xsd:element name="scriptCommand" type="xq:scriptCommandType"/>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" fixed="1.0"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterConstantsType">
+		<xsd:sequence maxOccurs="unbounded">
+			<xsd:element name="parameter">
+				<xsd:complexType>
+					<xsd:sequence>
+						<xsd:element name="parameterName" type="xsd:string"/>
+						<xsd:element name="value" type="xsd:string"/>
+					</xsd:sequence>
+				</xsd:complexType>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="insertionType">
+		<xsd:sequence>
+		<xsd:element name="insertionRule" maxOccurs="unbounded" minOccurs="1">
+		<xsd:complexType>
+		<xsd:sequence>
+		<xsd:element name="variablename" type="xsd:string"/>
+			<xsd:choice>
+				<xsd:element name="insertMessagePart">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="messagePartIndex" type="xsd:int"/>
+							<xsd:element name="messageContentId" type="xsd:string" minOccurs="0"/>
+							<xsd:element name="messageContentType" minOccurs="0" type="xsd:string"/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="replaceMessagePart">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:choice>
+								<xsd:element name="messagePartIndex" type="xsd:nonNegativeInteger"/>
+								<xsd:element name="messageContentId" type="xsd:string"/>
+							</xsd:choice>
+							<xsd:element name="messageContentType" minOccurs="0" type="xsd:string"/>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="insertLastChild">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:choice>
+								<xsd:element name="messagePartIndex" type="xsd:nonNegativeInteger"/>
+								<xsd:element name="messageContentId" type="xsd:string"/>
+								<xsd:element name="messageHeaderProperty" type="xsd:string"/>
+							</xsd:choice>
+							<xsd:element name="target">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="elem" type="xq:ElementTargetType" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="xpath" type="xsd:string"/>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+				       </xsd:complexType>
+				</xsd:element>
+				<xsd:element name="insertElement">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:choice>
+								<xsd:element name="messagePartIndex" type="xsd:nonNegativeInteger"/>
+								<xsd:element name="messageContentId" type="xsd:string"/>
+								<xsd:element name="messageHeaderProperty" type="xsd:string"/>
+							</xsd:choice>
+							<xsd:element name="target">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="elem" type="xq:ElementTargetType" minOccurs="1" maxOccurs="1"/>
+										<xsd:element name="xpath" type="xsd:string"/>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+				       </xsd:complexType>
+				</xsd:element>
+				<xsd:element name="assignValue">
+					<xsd:complexType>
+						<xsd:choice>
+							<xsd:element name="messagePart">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:choice>
+											<xsd:element name="messagePartIndex" type="xsd:nonNegativeInteger"/>
+											<xsd:element name="messageContentId" type="xsd:string"/>
+										</xsd:choice>
+										<xsd:element name="target">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="xpath" type="xsd:string"/>
+												</xsd:sequence>
+												<xsd:attribute name="name" type="xsd:string" default="false"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="messageHeaderProperty">
+								<xsd:complexType mixed="true">
+									<xsd:sequence>
+										<xsd:element name="target" minOccurs="0">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:element name="xpath" type="xsd:string"/>
+												</xsd:sequence>
+												<xsd:attribute name="name" type="xsd:string" default="false"/>
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:choice>
+		</xsd:sequence>
+		</xsd:complexType></xsd:element></xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:simpleType name="directionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="IN"/>
+			<xsd:enumeration value="OUT"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:simpleType name="parameterDirectionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="IN"/>
+			<xsd:enumeration value="OUT"/>
+			<xsd:enumeration value="INOUT"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+
+	<xsd:complexType name="commandType">
+		<xsd:sequence>
+			<xsd:choice>
+				<xsd:element name="scriptURL" type="xsd:anyURI"/>
+				<xsd:element name="script" type="xq:scriptType"/>
+			</xsd:choice>
+			<xsd:element name="parameterConstants" type="xq:parameterConstantsType" minOccurs="0"/>
+			<xsd:element name="nameSpaces" type="xq:nameSpacesType" minOccurs="0"/>
+			<xsd:element name="extractionRules" type="xq:extractionType" minOccurs="0"/>
+			<xsd:element name="insertionRules" type="xq:insertionType" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" fixed="1.0"/>
+		<xsd:attribute name="name" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+</xsd:schema>

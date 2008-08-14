@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq"
+    xmlns:xq="http://www.sonicsw.com/sonicxq"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/ESBDiffLog.xsd"/>
+    <xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/ESBDependencyLog.xsd"/>
+
+    <xsd:element name="ESBArtifactImpact" type="xq:ArtifactImpactListType"/>
+
+    <xsd:complexType name="ArtifactImpactListType">
+        <xsd:sequence>
+            <xsd:element name="source" type="xsd:string"/>
+            <xsd:element name="target" type="xsd:string"/>
+            <xsd:element name="output" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="date" type="xsd:string"/>
+            <xsd:element name="changes" type="xq:diffType"/>
+            <xsd:element name="addedDependencies" type="xq:dependencyListType"/>
+            <xsd:element name="deletedDependencies" type="xq:dependencyListType"/>
+        </xsd:sequence>
+    </xsd:complexType>
+
+</xsd:schema>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.sonicsw.com/sonicxq/migration" xmlns:migrate="http://www.sonicsw.com/sonicxq/migration" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="migrationSuite">
+		<xs:complexType>
+			<xs:sequence maxOccurs="unbounded">
+				<xs:element name="migration" type="migrate:migrationType"/>
+			</xs:sequence>
+			<xs:attribute name="name" type="xs:string" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="migrationType">
+		<xs:sequence maxOccurs="unbounded">
+			<xs:element name="directoryMigration">
+				<xs:complexType>
+					<xs:attribute name="directory" type="xs:string" use="required"/>
+					<xs:attribute name="stylesheet" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+	</xs:complexType>
+</xs:schema>

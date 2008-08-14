@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xq="http://www.sonicsw.com/sonicxq" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:element name="endpointType">
+		<xsd:annotation>
+			<xsd:documentation>Comment describing your root element</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="validParams" type="xq:initParamsType" minOccurs="0"/>
+			</xsd:sequence>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="messageAdapterJarURI" type="xsd:anyURI" use="optional"/>
+			<xsd:attribute name="messageAdapterClass" type="xsd:string" use="optional"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

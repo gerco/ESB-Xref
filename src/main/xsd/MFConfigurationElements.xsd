@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/mf" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:mf="http://www.sonicsw.com/mf" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:simpleType name="mf_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="string"/>
+			<xsd:enumeration value="integer"/>
+			<xsd:enumeration value="boolean"/>
+			<xsd:enumeration value="bigdecimal"/>
+			<xsd:enumeration value="long"/>
+			<xsd:enumeration value="bytes"/>
+			<xsd:enumeration value="date"/>
+			<xsd:enumeration value="reference"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:element name="ListItem">
+		<xsd:complexType>
+			<xsd:simpleContent>
+				<xsd:extension base="xsd:string">
+					<xsd:attribute name="value" type="xsd:string"/>
+					<xsd:attribute name="type" type="mf:mf_type" use="required"/>
+				</xsd:extension>
+			</xsd:simpleContent>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="NewListItem">
+		<xsd:complexType>
+			<xsd:choice>
+				<xsd:element ref="mf:ListItem"/>
+				<xsd:element ref="mf:AttributeSet"/>
+				<xsd:element ref="mf:AttributeList"/>
+			</xsd:choice>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="DeletedListItem">
+		<xsd:complexType/>
+	</xsd:element>
+	<xsd:element name="ElementID">
+		<xsd:complexType>
+			<xsd:attribute name="creationTimestamp" type="xsd:string" use="required"/>
+			<xsd:attribute name="version" type="xsd:string" use="required"/>
+			<xsd:attribute name="releaseVersion" type="xsd:string" use="required"/>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="type" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Attachment">
+		<xsd:complexType>
+			<xsd:attribute name="path" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AttributeName">
+		<xsd:complexType>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AttributeSetType">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="mf:AttributeName" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Attribute">
+		<xsd:complexType>
+		 <xsd:simpleContent>
+		  <xsd:extension base="xsd:string">
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="value" type="xsd:string" use="required"/>
+			<xsd:attribute name="type" type="mf:mf_type" use="required"/>
+		  </xsd:extension>
+		 </xsd:simpleContent>  
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AttributeList">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="mf:AttributeName" minOccurs="0"/>
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="mf:ListItem"/>
+					<xsd:element ref="mf:NewListItem"/>
+					<xsd:element ref="mf:DeletedListItem"/>
+					<xsd:element ref="mf:AttributeSet"/>
+					<xsd:element ref="mf:AttributeList"/>
+					<xsd:element ref="mf:AttributeSetType"/>
+				</xsd:choice>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AttributeSet">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="mf:AttributeName" minOccurs="0"/>
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="mf:Attribute"/>
+					<xsd:element ref="mf:AttributeSet"/>
+					<xsd:element ref="mf:AttributeList"/>
+					<xsd:element ref="mf:AttributeSetType"/>
+				</xsd:choice>
+			</xsd:sequence>
+			<xsd:attribute name="type" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="ConfigElement">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="mf:ElementID"/>
+				<xsd:element ref="mf:Attachment" minOccurs="0"/>
+				<xsd:element ref="mf:AttributeSet"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Directory">
+		<xsd:complexType>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element ref="mf:ConfigElement"/>
+				<xsd:element ref="mf:Directory"/>
+			</xsd:choice>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+			<xsd:attribute name="elementSizeEstimate" type="xsd:string"/>
+			<xsd:attribute name="numberofElementsEstimate" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="Domain">
+		<xsd:complexType>
+			<xsd:choice>
+				<xsd:element ref="mf:ConfigElement"/>
+				<xsd:element ref="mf:Directory"/>
+			</xsd:choice>
+			<xsd:attribute name="name" type="xsd:string" use="required"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

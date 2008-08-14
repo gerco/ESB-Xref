@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:complexType name="endpointSchemaType">
+		<xsd:sequence>
+			<xsd:element name="params" type="xq:paramsType" minOccurs="0"/>
+			<xsd:element name="wsdlUrl" type="xsd:string" minOccurs="0"/>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="qualityOfService" type="xq:qosType" use="optional" default="BEST_EFFORT"/>
+		<xsd:attribute name="type_ref" type="xsd:string" use="required"/>
+		<xsd:attribute name="connection_ref" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:element name="endpoint" type="xq:endpointSchemaType"/>
+</xsd:schema>

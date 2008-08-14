@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.sonicsw.com/esb/service/invocation"
+xmlns:xq="http://www.sonicsw.com/sonicxq"
+xmlns:it="http://www.sonicsw.com/esb/service/invocation">
+
+	<xsd:import namespace="http://www.sonicsw.com/sonicxq" schemaLocation="file:///D:/Sonic75/ESB7.5/schema/InvocationAction.xsd"/>
+
+	<xsd:complexType name="faultsType">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="fault" type="it:faultType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+   <xsd:complexType name="headerFaultsType">
+		<xsd:sequence minOccurs="0" maxOccurs="unbounded">
+			<xsd:element name="fault" type="it:faultType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="faultType">
+		<xsd:attribute name="faultName" type="xsd:string" use="required"/>
+      <xsd:attribute name="type" type="xsd:string" use="required"/>
+      <xsd:attribute name="isElement" type="xsd:boolean" use="required"/>
+      <xsd:attribute name="typeURI" type="xsd:string" use="required"/>
+      <xsd:attribute name="namespaceURI" type="xsd:string" use="optional"/>
+      <xsd:attribute name="baseType" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+   <xsd:complexType name="soapInfoType">
+      <xsd:sequence>
+         <xsd:element name="soapActionURI" type="xsd:string" minOccurs="0"  maxOccurs="1"/>
+         <xsd:element name="operationStyle" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+         <xsd:element name="use" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+         <xsd:element name="inputNamespace" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+         <xsd:element name="inputEncodingStyle" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+         <xsd:element name="outputEncodingStyle" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="endpoint" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+         <xsd:element name="headerFaults" type="it:headerFaultsType" minOccurs="0" maxOccurs="1"/>
+      </xsd:sequence>
+   </xsd:complexType>
+
+	<xsd:complexType name="serviceNameType">
+		<xsd:attribute name="local_serviceName" type="xsd:string" use="required"/>
+		<xsd:attribute name="namespace" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="bindingNameType">
+		<xsd:attribute name="local_bindingName" type="xsd:string" use="required"/>
+		<xsd:attribute name="namespace" type="xsd:string" use="required"/>
+	</xsd:complexType>
+	<xsd:complexType name="portTypeType">
+		<xsd:attribute name="local_portType" type="xsd:string" use="required"/>
+		<xsd:attribute name="namespace" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="parameterInfoValueType">
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+		<xsd:attribute name="isSoapHeader" type="xsd:boolean" use="required"/>
+      <xsd:attribute name="isElement" type="xsd:boolean" use="required"/>
+      <xsd:attribute name="typeURI" type="xsd:string" use="optional"/>
+      <xsd:attribute name="namespaceURI" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="parameterInfoType">
+		<xsd:sequence>
+			<xsd:element name="parameterInfo" minOccurs="0" maxOccurs="unbounded" type="it:parameterInfoValueType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="policyType">
+		<xsd:sequence>
+			<xsd:any namespace="##any" processContents="lax" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="endpointReferenceType">
+		<xsd:sequence>
+			<xsd:any namespace="##any" processContents="lax" minOccurs="0"/>
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="operationNameType" mixed="true">
+		<xsd:attribute name="message" type="xsd:string" use="optional"/>
+	</xsd:complexType>
+	
+	<xsd:complexType name="invocationType">
+		<xsd:complexContent>
+			<xsd:restriction base="xq:scriptCommandType">
+				<xsd:sequence>
+					<xsd:element name="command">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element name="wsdlLocation" type="xsd:anyURI"/>
+								<xsd:element name="esbwsType" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="serviceName" type="it:serviceNameType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="portName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="bindingName" type="it:bindingNameType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="portType" type="it:portTypeType"/>
+								<xsd:element name="operationName" type="it:operationNameType"/>
+                        <xsd:element name="requestResponse" type="xsd:boolean" minOccurs="1" maxOccurs = "1"/>
+                        <xsd:element name="targetNamespace" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                        <xsd:element name="soap" type="it:soapInfoType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="faults" type="it:faultsType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="parameterInfoList" type="it:parameterInfoType" minOccurs="0" maxOccurs="1"/>								
+								<xsd:element name="policy" type="it:policyType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="responsePolicy" type="it:policyType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="faultPolicy" type="it:policyType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="endpointReference" type="it:endpointReferenceType" minOccurs="0" maxOccurs="1"/>
+								<xsd:element name="wsaAction" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+							</xsd:sequence>
+						</xsd:complexType>
+					</xsd:element>
+					<xsd:element name="parameterList" type="xq:parameterListType" minOccurs="0" maxOccurs="1"/>
+				</xsd:sequence>
+			</xsd:restriction>
+		</xsd:complexContent>
+	</xsd:complexType>
+	<xsd:element name="command" type="xq:commandType"/>
+	<xsd:element name="script" type="xq:scriptType"/>
+</xsd:schema>
