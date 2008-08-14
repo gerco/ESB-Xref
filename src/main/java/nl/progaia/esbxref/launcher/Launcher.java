@@ -16,7 +16,7 @@ public class Launcher {
 	public final static String PREF_XQ_HOME = "com.sonicsw.xq.home";
 	
 	private final static String[] myJars = new String[] {
-		"esbxref-core.jar",
+		"ESBXref-core.jar",
 		"MFUtils-1.0-SNAPSHOT.jar"
 	};
 	

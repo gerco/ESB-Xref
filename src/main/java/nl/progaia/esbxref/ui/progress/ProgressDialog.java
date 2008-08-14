@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.HeadlessException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -60,7 +62,9 @@ public class ProgressDialog extends JDialog implements ChangeListener{
         contents.add(statusLabel, BorderLayout.NORTH); 
         contents.add(progressBar, BorderLayout.CENTER); 
  
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE); 
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new CancelOnCloseWindowListener());
+        
         monitor.addChangeListener(this); 
     } 
  
@@ -76,10 +80,22 @@ public class ProgressDialog extends JDialog implements ChangeListener{
         } 
  
         if(monitor.getCurrent()!=monitor.getTotal()){ 
-            statusLabel.setText(monitor.getStatus()); 
-            if(!monitor.isIndeterminate()) 
-                progressBar.setValue(monitor.getCurrent()); 
-        }else 
-            dispose(); 
+            statusLabel.setText(monitor.getStatus());
+            progressBar.setMaximum(monitor.getTotal());
+            progressBar.setIndeterminate(monitor.isIndeterminate());
+            if(!progressBar.isIndeterminate())
+                progressBar.setValue(monitor.getCurrent());
+        } else { 
+            dispose();
+        }
     } 
+    
+    private class CancelOnCloseWindowListener extends WindowAdapter {
+
+		@Override
+		public void windowClosing(WindowEvent arg0) {
+			monitor.setCanceled(true);
+		}
+    	
+    }
 } 

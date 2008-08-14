@@ -42,7 +42,7 @@ public class MainFrame extends JFrame {
 	
 	private JStatusBar statusBar;
 	private final TaskExecutor worker;
-	
+
 	public MainFrame(TaskExecutor worker) {
 		super("Sonic ESB Cross Reference");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -138,10 +138,18 @@ public class MainFrame extends JFrame {
 		});
 		
 		JMenuItem exportToCSVItem = new JMenuItem("Export to CSV");
-		exportToCSVItem.setEnabled(false);
+		exportToCSVItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				exportToCSV();
+			}
+		});
 		
 		JMenuItem exportToHTMLItem = new JMenuItem("Export to HTML");
-		exportToHTMLItem.setEnabled(false);
+		exportToHTMLItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				exportToHTML();
+			}
+		});
 		
 		// Assemble the file menu
 		fileMenu.add(saveAnalysisItem);
@@ -214,7 +222,9 @@ public class MainFrame extends JFrame {
 	
 	protected void saveAnalysis() {
 		JFileChooser chooser = new JFileChooser();
-		chooser.showSaveDialog(this);
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.addChoosableFileFilter(new ExtensionFileFilter(".xref", "Cross reference files"));
+		chooser.showDialog(this, "Save analysis");
 		
 		if(chooser.getSelectedFile() != null) {
 			final File file = chooser.getSelectedFile();
@@ -240,7 +250,9 @@ public class MainFrame extends JFrame {
 	
 	protected void loadAnalysis() {
 		JFileChooser chooser = new JFileChooser();
-		chooser.showOpenDialog(this);
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.addChoosableFileFilter(new ExtensionFileFilter(".xref", "Cross reference files"));
+		chooser.showDialog(this, "Load analysis");
 		
 		if(chooser.getSelectedFile() == null)
 			return;
@@ -292,9 +304,58 @@ public class MainFrame extends JFrame {
 		worker.execute(t);
 	}
 	
+	protected void exportToCSV() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.addChoosableFileFilter(new ExtensionFileFilter(".csv", "CSV files"));
+		chooser.showDialog(this, "Export to CSV");
+		
+		if(chooser.getSelectedFile() != null) {
+			final File file = chooser.getSelectedFile();
+			final DependencyGraph graph = graphPanel.getDependencyGraph();
+			
+			worker.execute(new Task() {
+				@Override
+				public void execute() throws Exception {
+					graph.dumpToCSVFile(file);
+				}
+				
+				@Override
+				public String toString() {
+					return "Exporting to " + file.getAbsolutePath();
+				}
+			});
+		}
+	}
+	
+	protected void exportToHTML() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.addChoosableFileFilter(new ExtensionFileFilter(".html", "HTML files"));
+		chooser.showDialog(this, "Export to HTML");
+		
+		if(chooser.getSelectedFile() != null) {
+			final File file = chooser.getSelectedFile();
+			final DependencyGraph graph = graphPanel.getDependencyGraph();
+			
+			worker.execute(new Task() {
+				@Override
+				public void execute() throws Exception {
+					graph.dumpToHTMLFile(file);
+				}
+				
+				@Override
+				public String toString() {
+					return "Exporting to " + file.getAbsolutePath();
+				}
+			});
+		}
+	}
+	
 	protected void findUnused() {
 		JFileChooser chooser = new JFileChooser();
-		chooser.showSaveDialog(this);
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.showDialog(this, "Save unused artifact report");
 		
 		if(chooser.getSelectedFile() != null) {
 			final File file = chooser.getSelectedFile();

@@ -29,15 +29,21 @@ public class TaskEvent extends EventObject {
 
 	/**
 	 * <tt>TASK_STARTED</tt> is dispatched when a task starts executing. The source
-	 * is the Task itself, the info object is null.
+	 * is the Task itself, the info object is null by default.
 	 * <p>
 	 * <tt>TASK_PROGRESS</tt> is dispatched when a task has progress to report. The info 
 	 * object is an Integer object, the source is the Task itself. Some Tasks do not 
 	 * dispatch this event, some do. It is optional.
 	 * <p>
+	 * <tt>TASK_PROGRESS_INFO</tt> is dispatched by a task when it wants to change it's
+	 * progress attributes. When a task does not know the maximum amount of progress it
+	 * will start as '1' (or indeterminate). When a task later knows more about how long
+	 * the operation will taks, it dispatches this event. The info object is a Integer
+	 * with the maximum value of the progress indicator.
+	 * <p> 
 	 * <tt>TASK_FINISHED</tt> is dispatched when a task has stopped executing. This event
 	 * always occurs, whether there has been an error or not. The Task itself is the source
-	 * and the info object is null.
+	 * and the info object is null by default.
 	 * <p>
 	 * <tt>TASK_ERROR</tt> reports an error in the Task. The info object is the Exception
 	 * that occurred, the Task is the source.
@@ -48,6 +54,7 @@ public class TaskEvent extends EventObject {
 	public static enum EVENT {
 		TASK_STARTED,
 		TASK_PROGRESS,
+		TASK_PROGRESS_INFO,
 		TASK_FINISHED,
 		TASK_ERROR
 	}

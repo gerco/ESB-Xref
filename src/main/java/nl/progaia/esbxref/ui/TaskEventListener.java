@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import nl.progaia.esbxref.events.EventListener;
+import nl.progaia.esbxref.task.CancelableTask;
 import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
 import nl.progaia.esbxref.ui.progress.ProgressMonitor;
@@ -80,10 +81,22 @@ class TaskEventListener implements EventListener<TaskEvent> {
 			} 
 			break;
 			
+		case TASK_PROGRESS_INFO:
+			if(monitor != null) {
+				Task task = (Task)event.getSource();
+				monitor.setTotal((Integer)event.getInfo());
+				monitor.setCurrent(task.getStatus(), 0);
+			}
+			break;
+			
 		case TASK_PROGRESS:
 			if(monitor != null) {
 				Task task = (Task)event.getSource();
 				monitor.setCurrent(task.getStatus(), (Integer)event.getInfo());
+				if(task instanceof CancelableTask && monitor.isCanceled()) {
+					((CancelableTask)task).cancel();
+					monitor.setCurrent("Cancelling...", (Integer)event.getInfo());
+				}
 			}
 			break;
 			

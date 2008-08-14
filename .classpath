@@ -4,10 +4,5 @@
 	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry kind="var" path="ESB_LIB/saaj.jar"/>
-	<classpathentry kind="var" path="ESB_LIB/jaxrpc.jar"/>
-	<classpathentry kind="var" path="ESB_LIB/commons-discovery.jar"/>
-	<classpathentry kind="var" path="ESB_LIB/axis.jar"/>
-	<classpathentry kind="lib" path="D:/Sonic75/ESB7.5/lib/sonic_deploy.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

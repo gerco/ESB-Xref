@@ -21,10 +21,11 @@ import javax.swing.event.ChangeListener;
  * Lesser General Public License for more details. 
  */ 
 public class ProgressMonitor{ 
-    int total, current=-1; 
-    boolean indeterminate; 
-    int milliSecondsToWait = 500; // half second 
-    String status; 
+	private int total, current=-1; 
+    private boolean indeterminate; 
+    private int milliSecondsToWait = 500; // half second 
+    private String status;
+    private volatile boolean canceled;
  
     public ProgressMonitor(int total, boolean indeterminate, int milliSecondsToWait){ 
         this.total = total; 
@@ -37,6 +38,11 @@ public class ProgressMonitor{
         this.indeterminate = indeterminate; 
     } 
  
+    public void setTotal(int value) {
+    	total = value;
+    	indeterminate = total == 1;
+    }
+    
     public int getTotal(){ 
         return total; 
     } 
@@ -74,9 +80,17 @@ public class ProgressMonitor{
 		fireChangeEvent(); 
     } 
  
+    public void setCanceled(boolean canceled) {
+    	this.canceled = canceled;
+    }
+    
+    public boolean isCanceled() {
+    	return canceled;
+    }
+    
     /*--------------------------------[ Event support ]--------------------------------*/ 
- 
-    private ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>(); 
+
+	private ArrayList<ChangeListener> listeners = new ArrayList<ChangeListener>(); 
     private ChangeEvent ce = new ChangeEvent(this); 
  
     public void addChangeListener(ChangeListener listener){ 

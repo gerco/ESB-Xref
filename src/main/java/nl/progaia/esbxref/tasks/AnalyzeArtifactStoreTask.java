@@ -51,8 +51,8 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		artifactsToAnalyze = as.length;
 		int currentArtifact = 0;
 		
-		// Report the task as started, we know the number of items to analyze now
-		super.dispatchTaskStarted();
+		// Report the number of items to analyze now
+		dispatchProgressInfo(artifactsToAnalyze);
 
 		// Store all artifacts in the graph first
 		for(IArtifact a: as) {
@@ -75,6 +75,18 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 			analyzeInternal(getStorage(), a, graph);
 			if(canceled) break;
 		}
+		
+		// Now merge /ESB/Service/processName with /ESB/Process/processName
+		for(INode n: graph.getAllNodes()) {
+			if(n.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
+				INode serviceNode = 
+					graph.getNode(ESBArtifact.SERVICE.getArchivePath() + n.getName());
+				if(serviceNode != null) {
+					// System.out.println("Merging " + n + " and " + serviceNode);
+					graph.mergeNodes(n, serviceNode);
+				}
+			}
+		}		
 
 		// Compress the links in the graph to the minimum number to represent the
 		// information completely
@@ -84,18 +96,13 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 	}
 	
 	@Override
-	protected void dispatchTaskStarted() {
-		// Do nothing
-	}
-	
-	@Override
 	protected Object getInfo() {
 		return graph;
 	}
 	
 	@Override
 	public int getProgressMaximum() {
-		return artifactsToAnalyze;
+		return artifactsToAnalyze == 0 ? 1 : artifactsToAnalyze;
 	}
 	
 	public void cancel() {
@@ -104,12 +111,15 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 	
 	@Override
 	public String getStatus() {
+		if(artifactsToAnalyze == 0)
+			return "Finding artifacts to analyze";
+		
 		return "Analyzing " + currentArtifactName;
 	}
 	
 	@Override
 	public String toString() {
-		return "Analyzing dependencies";
+		return getStatus();
 	}
 	
 	private void analyzeInternal(IArtifactStorage storage, IArtifact root, DependencyGraph graph) throws Exception {
@@ -133,26 +143,7 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		// Analyze the dependencies themselves
 		for(IArtifact a: dependencies) {
 			analyzeInternal(storage, a, graph);
-		}
-		
-		// Now merge /ESB/Service/processName with /ESB/Process/processName
-		for(INode n: graph.getAllNodes()) {
-			if(n.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
-				INode serviceNode = 
-					graph.getNode(ESBArtifact.PROCESS.getArchivePath() + n.getName());
-				graph.mergeNodes(n, serviceNode);
-			}
-		}
-		
-		// If the artifact is a service that belongs with a process, merge the two by
-		// replacing 'root' with the process artifact but specifying the dependencies
-		// of the original service artifact.
-		if(ESBArtifact.SERVICE.getArchivePath().equals(root.getArchiveParentPath())) {
-			String processPath = ESBArtifact.PROCESS.getArchivePath() + root.getName();
-			if(graph.getNode(processPath) != null) {
-				root = new ESBArtifact(ESBArtifact.PROCESS, root.getName());
-			}
-		}
+		}		
 	}	
 	
 	/**

@@ -39,7 +39,10 @@ public abstract class EventSource<T> {
 	}
 	
 	protected void dispatchEvent(T event) {
-		for(EventListener<T> listener: listeners) {
+		ArrayList<EventListener<T>> copyOfListeners = 
+			new ArrayList<EventListener<T>>(listeners);
+		
+		for(EventListener<T> listener: copyOfListeners) {
 			listener.processEvent(event);
 		}
 	}

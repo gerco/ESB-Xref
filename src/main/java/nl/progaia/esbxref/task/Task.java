@@ -72,6 +72,16 @@ public abstract class Task extends EventSource<TaskEvent> implements Runnable {
 	protected void dispatchTaskFinished() {
 		dispatchEvent(new TaskEvent(EVENT.TASK_FINISHED, getInfo(), this));
 	}
+	
+	/**
+	 * Broadcast maximum amount of progress to be made for this task. A value of 1
+	 * means indeterminate.
+	 * 
+	 * @param value
+	 */
+	protected void dispatchProgressInfo(int value) {
+		dispatchEvent(new TaskEvent(EVENT.TASK_PROGRESS_INFO, new Integer(value), this));
+	}
 
 	/**
 	 * This method should perform the actual work. Any exceptions thrown will be converted
@@ -113,7 +123,7 @@ public abstract class Task extends EventSource<TaskEvent> implements Runnable {
 	public int getProgressMaximum() {
 		return 1;
 	}
-	
+		
 	/**
 	 * Raise the TASK_PROGRESS event with this task as the source and 'current' as the value
 	 * 
