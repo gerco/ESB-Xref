@@ -66,13 +66,13 @@ public class DependencyGraph implements Serializable {
 	 * @param artifact
 	 * @param dependencies
 	 */
-	public void addArtifact(IArtifact artifact, IArtifact[] dependencies) {
+	public INode addArtifact(IArtifact artifact, IArtifact[] dependencies) {
 		if(artifact == null)
 			throw new IllegalArgumentException("Artifact must not be null");
 
 		// Don't store directories, they screw up the "unused artifact analysis"
 		if(artifact.isDirectory())
-			return;
+			return null;
 		
 		INode node = addArtifactInternal(artifact);
 		
@@ -88,6 +88,8 @@ public class DependencyGraph implements Serializable {
 			node.addIUse(depNode);
 			depNode.addUsedBy(node);
 		}
+		
+		return node;
 	}
 	
 	/**

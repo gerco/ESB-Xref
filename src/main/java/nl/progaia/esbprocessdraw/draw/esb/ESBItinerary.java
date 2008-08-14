@@ -2,11 +2,11 @@ package nl.progaia.esbprocessdraw.draw.esb;
 
 import nl.progaia.esbprocessdraw.draw.Drawable;
 import nl.progaia.esbprocessdraw.draw.VerticalDrawable;
-import nl.progaia.esbprocessdraw.schema.EndpointRefTypeEnumeration;
-import nl.progaia.esbprocessdraw.schema.FanoutType;
-import nl.progaia.esbprocessdraw.schema.ItineraryType;
-import nl.progaia.esbprocessdraw.schema.StepType;
-import nl.progaia.esbprocessdraw.schema.ItineraryType.Decision;
+import nl.progaia.esb.EndpointRefTypeEnumeration;
+import nl.progaia.esb.FanoutType;
+import nl.progaia.esb.ItineraryType;
+import nl.progaia.esb.StepType;
+import nl.progaia.esb.ItineraryType.Decision;
 
 public class ESBItinerary extends VerticalDrawable {
 

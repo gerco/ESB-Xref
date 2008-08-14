@@ -8,8 +8,8 @@ import java.util.List;
 import nl.progaia.esbprocessdraw.draw.Border;
 import nl.progaia.esbprocessdraw.draw.Drawable;
 import nl.progaia.esbprocessdraw.draw.HorizontalDrawable;
-import nl.progaia.esbprocessdraw.schema.ItineraryType.Decision;
-import nl.progaia.esbprocessdraw.schema.ItineraryType.Decision.Option;
+import nl.progaia.esb.ItineraryType.Decision;
+import nl.progaia.esb.ItineraryType.Decision.Option;
 
 public class ESBDecision extends HorizontalDrawable {
 

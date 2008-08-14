@@ -1,18 +1,25 @@
 package nl.progaia.esbxref.ui;
 
 import java.awt.BorderLayout;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+import nl.progaia.esbprocessdraw.ProcessRenderer;
+import nl.progaia.esbprocessdraw.draw.esb.ESBProcess;
+import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.INode;
 
 public class XRefResultsPanel extends JPanel {
 
 	private JTable usesTable;
 	private JTable whereUsedTable;
+	private ESBProcessPanel viewArea;
 	
 	private NodeListTableModel usesTableModel;
 	private NodeListTableModel whereUsedTableModel;
@@ -28,6 +35,10 @@ public class XRefResultsPanel extends JPanel {
 		usesTable = new JTable(usesTableModel);
 		whereUsedTable = new JTable(whereUsedTableModel);
 		
+		// Create the view area
+		viewArea = new ESBProcessPanel();
+//		viewArea.setEditable(false);
+		
 		// Now add the tables to a tabbedpane
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Uses", 
@@ -38,6 +49,10 @@ public class XRefResultsPanel extends JPanel {
 			new JScrollPane(whereUsedTable,
 					JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
+		tabbedPane.addTab("View",
+			new JScrollPane(viewArea,
+					JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
 		
 		add(tabbedPane, BorderLayout.CENTER);
 	}
@@ -46,9 +61,18 @@ public class XRefResultsPanel extends JPanel {
 		if(displayedNode != null) {
 			usesTableModel.setData(displayedNode.getIUse());
 			whereUsedTableModel.setData(displayedNode.getUsedBy());
+			
+			if(displayedNode instanceof ArtifactNode) {
+				ESBProcess p = ProcessRenderer.unmarshalProcess(
+						((ArtifactNode)displayedNode).getArtifactXml());
+				viewArea.setProcess(p);
+			} else {
+				viewArea.setProcess(null);
+			}
 		} else {
 			usesTableModel.setData(null);
 			whereUsedTableModel.setData(null);
+			viewArea.setProcess(null);
 		}
 	}
 	
@@ -57,6 +81,17 @@ public class XRefResultsPanel extends JPanel {
 		public NodeListTableModel() {
 			columnNames = new String[] {"Name"};
 			columnTypes = new Class[] {String.class};
+		}
+		
+		@Override
+		public void setData(List<INode> data) {
+			if(data != null) {
+				ArrayList<INode> copy = new ArrayList<INode>(data);
+				Collections.sort(copy);
+				super.setData(copy);
+			} else {
+				super.setData(null);
+			}
 		}
 		
 		@Override

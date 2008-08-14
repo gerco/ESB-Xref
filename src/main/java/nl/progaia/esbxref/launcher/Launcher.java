@@ -17,7 +17,9 @@ public class Launcher {
 	
 	private final static String[] myJars = new String[] {
 		"ESBXref-core.jar",
-		"MFUtils-1.0-SNAPSHOT.jar"
+		"dependency/MFUtils-1.0-SNAPSHOT.jar",
+		"dependency/jaxb-api-2.1.jar",
+		"dependency/jaxb-impl-2.1.3.jar"
 	};
 	
 	private final static String[] mqJars = new String[] {

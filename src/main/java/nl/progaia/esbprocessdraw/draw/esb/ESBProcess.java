@@ -1,9 +1,8 @@
 package nl.progaia.esbprocessdraw.draw.esb;
 
-import nl.progaia.esbprocessdraw.Main;
+import nl.progaia.esb.Process;
 import nl.progaia.esbprocessdraw.draw.Drawable;
 import nl.progaia.esbprocessdraw.draw.TitledBorder;
-import nl.progaia.esbprocessdraw.schema.Process;
 
 public class ESBProcess extends ESBItinerary {
 	private final Process process;
@@ -25,12 +24,12 @@ public class ESBProcess extends ESBItinerary {
 	}
 
 	public static Drawable getProcess(String name) {
-		Process p = Main.getArtifactStore().getProcess(name);
-		if(p == null) {
-			return new GenericStep("Missing: " + name);
-		} else {
-			return new ESBProcess(p);
-		}
+//		Process p = Main.getArtifactStore().getProcess(name);
+//		if(p == null) {
+			return new ESBProcessStep(name);
+//		} else {
+//			return new ESBProcess(p);
+//		}
 	}
 	
 }

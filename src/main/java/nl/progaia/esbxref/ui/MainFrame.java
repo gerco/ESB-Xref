@@ -9,6 +9,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -26,6 +28,7 @@ import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
 import nl.progaia.esbxref.task.TaskExecutor;
 import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
+import nl.progaia.esbxref.tasks.AnalyzeXARTask;
 import nl.progaia.esbxref.tasks.UnusedArtifactReportTask;
 import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
 import nl.progaia.esbxref.ui.status.JStatusBar;
@@ -107,7 +110,6 @@ public class MainFrame extends JFrame {
 				analyzeXAR();
 			}
 		});
-		analyzeXARItem.setEnabled(false);
 		
 		JMenuItem saveAnalysisItem = new JMenuItem("Save analysis");
 		saveAnalysisItem.addActionListener(new ActionListener() {
@@ -216,8 +218,39 @@ public class MainFrame extends JFrame {
 	}
 	
 	protected void analyzeXAR() {
-		// TODO Auto-generated method stub
+		JFileChooser chooser = new JFileChooser();
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.addChoosableFileFilter(new ExtensionFileFilter(".xar", "ESB Archive files"));
+		chooser.showDialog(this, "Analyze XAR");
 		
+		if(chooser.getSelectedFile() == null)
+			return;
+
+		final File file = chooser.getSelectedFile();
+		if(file == null)
+			return;
+		
+		Task t = new AnalyzeXARTask(file);
+		t.addListener(new EventListener<TaskEvent>() {
+			public void processEvent(final TaskEvent event) {
+				switch(event.getId()) {
+				
+				case TASK_ERROR:
+					((Task)event.getSource()).removeListener(this);
+					break;
+					
+				case TASK_FINISHED:
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+						}
+					});
+					break;
+					
+				}
+			}
+		});
+		worker.execute(t);
 	}
 	
 	protected void saveAnalysis() {
@@ -234,9 +267,14 @@ public class MainFrame extends JFrame {
 				@Override
 				public void execute() throws Exception {
 					FileOutputStream fout = new FileOutputStream(file);
-					ObjectOutputStream oos = new ObjectOutputStream(fout);
+					GZIPOutputStream zout = new GZIPOutputStream(fout);
+					ObjectOutputStream oos = new ObjectOutputStream(zout);
 					oos.writeObject(graph);
-					fout.flush();
+					oos.flush();
+					zout.flush();
+					zout.finish();
+					oos.close();
+					zout.close();
 					fout.close();
 				}
 				
@@ -265,7 +303,8 @@ public class MainFrame extends JFrame {
 			@Override
 			public void execute() throws Exception {
 				FileInputStream fin = new FileInputStream(file);
-				ObjectInputStream oin = new ObjectInputStream(fin);				
+				GZIPInputStream zin = new GZIPInputStream(fin);
+				ObjectInputStream oin = new ObjectInputStream(zin);				
 				graph = (DependencyGraph) oin.readObject();
 				fin.close();
 			}

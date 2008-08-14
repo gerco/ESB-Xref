@@ -24,7 +24,7 @@
     </fileSet>
     <fileSet>
       <directory>target/dependency</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/dependency</outputDirectory>
       <includes>
         <include>*.jar</include>
       </includes>

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import nl.progaia.esbxref.artifact.QueueArtifact;
 import nl.progaia.esbxref.artifact.TopicArtifact;
+import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.DependencyGraph;
 import nl.progaia.esbxref.dep.INode;
 import nl.progaia.esbxref.task.CancelableTask;
@@ -138,7 +139,10 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		System.arraycopy(deepDeps, 0, dependencies, travDeps.length, deepDeps.length);
 					
 		// Add the artifact to the graph and link the dependencies accordingly
-		graph.addArtifact(root, dependencies);
+		ArtifactNode n = (ArtifactNode)graph.addArtifact(root, dependencies);
+		if(n != null && n.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
+			n.setArtifactXml(storage.getContentsAsString(root));
+		}
 		
 		// Analyze the dependencies themselves
 		for(IArtifact a: dependencies) {

@@ -8,8 +8,8 @@ import java.util.List;
 import nl.progaia.esbprocessdraw.draw.Border;
 import nl.progaia.esbprocessdraw.draw.Drawable;
 import nl.progaia.esbprocessdraw.draw.HorizontalDrawable;
-import nl.progaia.esbprocessdraw.schema.FanoutType;
-import nl.progaia.esbprocessdraw.schema.FanoutType.Path;
+import nl.progaia.esb.FanoutType;
+import nl.progaia.esb.FanoutType.Path;
 
 /**
  * A fanout is displayed by a triangle and draws lines to each of it's
