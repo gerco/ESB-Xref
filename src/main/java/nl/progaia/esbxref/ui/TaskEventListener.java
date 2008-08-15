@@ -92,10 +92,12 @@ class TaskEventListener implements EventListener<TaskEvent> {
 		case TASK_PROGRESS:
 			if(monitor != null) {
 				Task task = (Task)event.getSource();
-				monitor.setCurrent(task.getStatus(), (Integer)event.getInfo());
+				
 				if(task instanceof CancelableTask && monitor.isCanceled()) {
 					((CancelableTask)task).cancel();
 					monitor.setCurrent("Cancelling...", (Integer)event.getInfo());
+				} else {
+					monitor.setCurrent(task.getStatus(), (Integer)event.getInfo());
 				}
 			}
 			break;

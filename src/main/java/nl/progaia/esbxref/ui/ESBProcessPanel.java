@@ -20,8 +20,10 @@ public class ESBProcessPanel extends JPanel {
 	public void paint(Graphics g) {
 		super.paint(g);
 		
-		if(process != null)
+		if(process != null) {
+//			System.out.println("Rendering " + process.getName());
 			ProcessRenderer.renderProcess(process, g);
+		}
 	}
 
 	public ESBProcess getProcess() {
@@ -29,11 +31,12 @@ public class ESBProcessPanel extends JPanel {
 	}
 
 	public void setProcess(ESBProcess process) {
+		
 		this.process = process;
 		if(process != null)
 			setPreferredSize(process.getSize());
-//		else
 			
 		revalidate();
+		repaint();
 	}
 }

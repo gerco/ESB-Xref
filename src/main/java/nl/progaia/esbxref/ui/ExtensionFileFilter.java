@@ -15,7 +15,7 @@ public class ExtensionFileFilter extends FileFilter {
 
 	@Override
 	public boolean accept(File f) {
-		return f.getName().toLowerCase().endsWith(extension);
+		return f.isDirectory() || f.getName().toLowerCase().endsWith(extension);
 	}
 
 	@Override

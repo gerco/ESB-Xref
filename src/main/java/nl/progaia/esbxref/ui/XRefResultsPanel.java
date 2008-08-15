@@ -1,6 +1,8 @@
 package nl.progaia.esbxref.ui;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +16,7 @@ import nl.progaia.esbprocessdraw.ProcessRenderer;
 import nl.progaia.esbprocessdraw.draw.esb.ESBProcess;
 import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.INode;
+import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
 
 public class XRefResultsPanel extends JPanel {
 
@@ -23,6 +26,8 @@ public class XRefResultsPanel extends JPanel {
 	
 	private NodeListTableModel usesTableModel;
 	private NodeListTableModel whereUsedTableModel;
+	
+	private NodeSelectionListener selectionListener;
 	
 	public XRefResultsPanel() {
 		setLayout(new BorderLayout());
@@ -34,10 +39,18 @@ public class XRefResultsPanel extends JPanel {
 		// Create tables
 		usesTable = new JTable(usesTableModel);
 		whereUsedTable = new JTable(whereUsedTableModel);
+
+		// Set up listeners
+		usesTable.addMouseListener(new DoubleClickListener(usesTable));
+		whereUsedTable.addMouseListener(new DoubleClickListener(whereUsedTable));
+		setSelectionListener(new NodeSelectionListener() {
+			public void nodeSelected(INode node) {
+				System.out.println("You double clicked " + node + " but I don't care");
+			}
+		});
 		
 		// Create the view area
 		viewArea = new ESBProcessPanel();
-//		viewArea.setEditable(false);
 		
 		// Now add the tables to a tabbedpane
 		JTabbedPane tabbedPane = new JTabbedPane();
@@ -74,6 +87,41 @@ public class XRefResultsPanel extends JPanel {
 			whereUsedTableModel.setData(null);
 			viewArea.setProcess(null);
 		}
+	}
+	
+	public void setSelectionListener(NodeSelectionListener selectionListener) {
+		this.selectionListener = selectionListener;
+	}
+
+	public NodeSelectionListener getSelectionListener() {
+		return selectionListener;
+	}
+
+	public interface NodeSelectionListener {
+		public void nodeSelected(INode node);
+	}	
+	
+	private class DoubleClickListener extends MouseAdapter {
+
+		private final JTable table;
+		
+		public DoubleClickListener(JTable table) {
+			this.table = table;
+		}
+		
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if(e.getClickCount() == 2) {
+				if(table.getSelectedRow() != -1) {
+					INode node = 
+						((NodeListTableModel)table.getModel())
+							.getRowItem(table.getSelectedRow());
+					
+					selectionListener.nodeSelected(node);
+				}
+			}
+		}
+		
 	}
 	
 	private class NodeListTableModel extends ListTableModel<INode> {

@@ -10,11 +10,12 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-import nl.progaia.esbxref.dep.DependencyGraph;
 import nl.progaia.esbxref.dep.ArtifactNode;
+import nl.progaia.esbxref.dep.DependencyGraph;
 import nl.progaia.esbxref.dep.INode;
 
 public class DepGraphPanel extends JPanel {
@@ -50,8 +51,8 @@ public class DepGraphPanel extends JPanel {
 		
 		artifactTree = new JTree(treeModel);
 		artifactTree.setRootVisible(true);
+		artifactTree.setExpandsSelectedPaths(true);
 		artifactTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		
 		
 		artifactTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
@@ -76,6 +77,30 @@ public class DepGraphPanel extends JPanel {
 		
 		add(scrollPane);
 	}
+	
+	public void selectNode(INode node) {
+		TreePath treePath = new TreePath(rootNode);
+		String[] nodePath = node.getPath().split("/");
+		
+		for(String nodePathComponent: nodePath) {
+			TreeNode n = (TreeNode)treePath.getLastPathComponent();
+			
+			if(!n.isLeaf()) {
+				walkChildren:
+				for(int i=0; i < n.getChildCount(); i++) {
+					if(nodePathComponent.equals(n.getChildAt(i).toString())) {
+						treePath = treePath.pathByAddingChild(n.getChildAt(i));
+						break walkChildren;
+					}
+				}
+			}
+		}
+		
+		artifactTree.setSelectionPath(treePath);
+		artifactTree.scrollPathToVisible(treePath);
+	}
+	
+	
 	
 	public void setDependencyGraph(DependencyGraph graph) {
 		this.graph = graph;

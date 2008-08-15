@@ -4,11 +4,14 @@ import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.prefs.Preferences;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -31,6 +34,7 @@ import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
 import nl.progaia.esbxref.tasks.AnalyzeXARTask;
 import nl.progaia.esbxref.tasks.UnusedArtifactReportTask;
 import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
+import nl.progaia.esbxref.ui.XRefResultsPanel.NodeSelectionListener;
 import nl.progaia.esbxref.ui.status.JStatusBar;
 
 import com.sonicsw.deploy.tools.gui.common.DomainConnectionDialog;
@@ -38,19 +42,38 @@ import com.sonicsw.deploy.tools.gui.common.DomainConnectionModel;
 
 public class MainFrame extends JFrame {
 
+	private static final String WINDOW_TITLE = "Sonic ESB Cross Reference";
+
 	private static final long serialVersionUID = 5472232300765455080L;
 	
+	private Preferences prefs = Preferences.userNodeForPackage(MainFrame.class);
+	private static final String PREF_ROOT = MainFrame.class.getName() + ".";
+	private static final String PREF_DIVIDER_LOCATION = PREF_ROOT + "dividerLocation"; 
+	
+	private JSplitPane splitPane;
 	private DepGraphPanel graphPanel;
 	private XRefResultsPanel resultsPanel;
-	
+
+	private String currentFilename;
 	private JStatusBar statusBar;
 	private final TaskExecutor worker;
 
+	private JMenuItem analyzeDomainItem;
+	private JMenuItem analyzeXARItem;
+	private JMenuItem saveAnalysisItem;
+	private JMenuItem loadAnalysisItem;
+	private JMenuItem findUnusedItem;
+	private JMenuItem quitItem;
+	private JMenuItem exportToCSVItem;
+	private JMenuItem exportToHTMLItem;
+
 	public MainFrame(TaskExecutor worker) {
-		super("Sonic ESB Cross Reference");
+		super(WINDOW_TITLE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new SavePrefsWindowListener());
 		
 		initComponents();
+		setCurrentFilename(null);
 		setLocationByPlatform(true);
 		
 		worker.addListener(new TaskEventListener(this));
@@ -62,9 +85,11 @@ public class MainFrame extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		setJMenuBar(initMenuBar());
 		
-		JSplitPane splitPane = new JSplitPane();
+		splitPane = new JSplitPane();
 		splitPane.setLeftComponent(initDepGraphView());
 		splitPane.setRightComponent(initResultsPanel());
+		splitPane.setDividerLocation(
+				prefs.getInt(PREF_DIVIDER_LOCATION, -1));
 		getContentPane().add(splitPane, BorderLayout.CENTER);
 		
 		getContentPane().add(initStatusBar(), BorderLayout.SOUTH);
@@ -72,6 +97,13 @@ public class MainFrame extends JFrame {
 
 	private XRefResultsPanel initResultsPanel() {
 		resultsPanel = new XRefResultsPanel();
+		resultsPanel.setSelectionListener(new NodeSelectionListener() {
+			public void nodeSelected(INode node) {
+				if(graphPanel != null) {
+					graphPanel.selectNode(node);
+				}
+			}
+		});
 		return resultsPanel;
 	}
 
@@ -97,56 +129,56 @@ public class MainFrame extends JFrame {
 		JMenu fileMenu = new JMenu("File");
 		JMenu analyzeMenu = new JMenu("Analyze");
 		
-		JMenuItem analyzeDomainItem = new JMenuItem("Analyze domain...");
+		analyzeDomainItem = new JMenuItem("Analyze domain...");
 		analyzeDomainItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				analyzeDomain();
 			}
 		});
 		
-		JMenuItem analyzeXARItem = new JMenuItem("Analyze xar file...");
+		analyzeXARItem = new JMenuItem("Analyze xar file...");
 		analyzeXARItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				analyzeXAR();
 			}
 		});
 		
-		JMenuItem saveAnalysisItem = new JMenuItem("Save analysis");
+		saveAnalysisItem = new JMenuItem("Save analysis");
 		saveAnalysisItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				saveAnalysis();
 			}
 		});
 		
-		JMenuItem loadAnalysisItem = new JMenuItem("Load analysis");
+		loadAnalysisItem = new JMenuItem("Load analysis");
 		loadAnalysisItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				loadAnalysis();
 			}
 		});
 		
-		JMenuItem findUnusedItem = new JMenuItem("Find unused artifacts");
+		findUnusedItem = new JMenuItem("Find unused artifacts");
 		findUnusedItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				findUnused();
 			}
 		});
 		
-		JMenuItem quitItem = new JMenuItem("Quit");
+		quitItem = new JMenuItem("Quit");
 		quitItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				quit();
 			}
 		});
 		
-		JMenuItem exportToCSVItem = new JMenuItem("Export to CSV");
+		exportToCSVItem = new JMenuItem("Export to CSV");
 		exportToCSVItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				exportToCSV();
 			}
 		});
 		
-		JMenuItem exportToHTMLItem = new JMenuItem("Export to HTML");
+		exportToHTMLItem = new JMenuItem("Export to HTML");
 		exportToHTMLItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				exportToHTML();
@@ -193,6 +225,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+							setCurrentFilename("Untitled.xref");
 						}
 					});
 					break;
@@ -243,6 +276,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+							setCurrentFilename("Untitled.xref");
 						}
 					});
 					break;
@@ -332,6 +366,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+							setCurrentFilename(file.getName());
 						}
 					});
 					break;
@@ -408,13 +443,41 @@ public class MainFrame extends JFrame {
 		dispose();
 		System.exit(0);
 	}
+	
+	public String getCurrentFilename() {
+		return currentFilename;
+	}
 
+	public void setCurrentFilename(String currentFilename) {
+		this.currentFilename = currentFilename;
+		
+		if(getCurrentFilename() == null) {
+			setTitle(WINDOW_TITLE);
+		} else {
+			setTitle(WINDOW_TITLE + " - " + getCurrentFilename());
+		}
+		
+		boolean haveFile = getCurrentFilename() != null;
+		saveAnalysisItem.setEnabled(haveFile);
+		exportToCSVItem.setEnabled(haveFile);
+		exportToHTMLItem.setEnabled(haveFile);
+		findUnusedItem.setEnabled(haveFile);
+	}
+
+	/**
+	 * Whenever a task is executing, set the status bar to busy and display the
+	 * task name.
+	 * 
+	 * @author Gerco Dries (gdr@progaia-rs.nl)
+	 *
+	 */
 	private class StatusBarManipulator implements EventListener<TaskEvent> {
 		private boolean taskError = false;
 		
 		public void processEvent(final TaskEvent event) {	
 			switch(event.getId()) {
 			case TASK_STARTED:
+			case TASK_PROGRESS_INFO:
 				taskError = false;
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
@@ -448,6 +511,19 @@ public class MainFrame extends JFrame {
 				break;
 			}
 		}	
+	}
+
+	/**
+	 * This class saves the preferences when the window is about to close.
+	 * 
+	 * @author Gerco Dries (gdr@progaia-rs.nl)
+	 *
+	 */
+	private class SavePrefsWindowListener extends WindowAdapter {
+		@Override
+		public void windowClosing(WindowEvent e) {
+			prefs.putInt(PREF_DIVIDER_LOCATION, splitPane.getDividerLocation());
+		}
 	}
 	
 	static {
