@@ -16,7 +16,6 @@ import nl.progaia.esbprocessdraw.ProcessRenderer;
 import nl.progaia.esbprocessdraw.draw.esb.ESBProcess;
 import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.INode;
-import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
 
 public class XRefResultsPanel extends JPanel {
 

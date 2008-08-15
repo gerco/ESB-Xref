@@ -1,6 +1,7 @@
 package nl.progaia.esbxref.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -49,6 +50,10 @@ public class MainFrame extends JFrame {
 	private Preferences prefs = Preferences.userNodeForPackage(MainFrame.class);
 	private static final String PREF_ROOT = MainFrame.class.getName() + ".";
 	private static final String PREF_DIVIDER_LOCATION = PREF_ROOT + "dividerLocation"; 
+	private static final String PREF_WINDOW_X = PREF_ROOT + "x"; 
+	private static final String PREF_WINDOW_Y = PREF_ROOT + "y"; 
+	private static final String PREF_WINDOW_WIDTH = PREF_ROOT + "width"; 
+	private static final String PREF_WINDOW_HEIGHT = PREF_ROOT + "height"; 
 	
 	private JSplitPane splitPane;
 	private DepGraphPanel graphPanel;
@@ -74,7 +79,20 @@ public class MainFrame extends JFrame {
 		
 		initComponents();
 		setCurrentFilename(null);
-		setLocationByPlatform(true);
+		
+		int x = prefs.getInt(PREF_WINDOW_X, -1);
+		int y = prefs.getInt(PREF_WINDOW_Y, -1);
+		
+		if(x == -1 || y == -1) {
+			setLocationByPlatform(true);
+		} else {
+			setLocation(x, y);
+			
+			int width = prefs.getInt(PREF_WINDOW_WIDTH, -1);
+			int height = prefs.getInt(PREF_WINDOW_HEIGHT, -1);
+			if(width != -1 && height != -1)
+				setPreferredSize(new Dimension(width, height));
+		}
 		
 		worker.addListener(new TaskEventListener(this));
 		worker.addListener(new StatusBarManipulator());
@@ -523,6 +541,10 @@ public class MainFrame extends JFrame {
 		@Override
 		public void windowClosing(WindowEvent e) {
 			prefs.putInt(PREF_DIVIDER_LOCATION, splitPane.getDividerLocation());
+			prefs.putInt(PREF_WINDOW_X, getLocation().x);
+			prefs.putInt(PREF_WINDOW_Y, getLocation().y);
+			prefs.putInt(PREF_WINDOW_WIDTH, getSize().width);
+			prefs.putInt(PREF_WINDOW_HEIGHT, getSize().height);
 		}
 	}
 	

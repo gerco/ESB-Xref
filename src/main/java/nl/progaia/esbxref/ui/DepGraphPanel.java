@@ -1,14 +1,17 @@
 package nl.progaia.esbxref.ui;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.util.TreeSet;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -17,6 +20,8 @@ import javax.swing.tree.TreeSelectionModel;
 import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.DependencyGraph;
 import nl.progaia.esbxref.dep.INode;
+
+import com.sonicsw.deploy.artifact.ESBArtifact;
 
 public class DepGraphPanel extends JPanel {
 	public interface DepGraphSelectionListener {
@@ -53,6 +58,7 @@ public class DepGraphPanel extends JPanel {
 		artifactTree.setRootVisible(true);
 		artifactTree.setExpandsSelectedPaths(true);
 		artifactTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		artifactTree.setCellRenderer(new ArtifactTreeCellRenderer());
 		
 		artifactTree.getSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
@@ -149,5 +155,83 @@ public class DepGraphPanel extends JPanel {
 
 	public DepGraphSelectionListener getSelectionListener() {
 		return selectionListener;
+	}
+	
+	private class ArtifactTreeCellRenderer extends DefaultTreeCellRenderer {
+		
+		// ESB Icons
+		private ImageIcon ICON_CONTAINER = 
+			new ImageIcon(getClass().getResource("icons/container.gif"));
+		private ImageIcon ICON_ESBP = 
+			new ImageIcon(getClass().getResource("icons/esbp.gif"));
+		private ImageIcon ICON_ESBSTYP = 
+			new ImageIcon(getClass().getResource("icons/service_type.gif"));
+		private ImageIcon ICON_SERVICE = 
+			new ImageIcon(getClass().getResource("icons/service.gif"));
+		private ImageIcon ICON_ENDPOINT = 
+			new ImageIcon(getClass().getResource("icons/endpoint.gif"));
+		
+		// SonicFS icons
+		private ImageIcon ICON_CBR = 
+			new ImageIcon(getClass().getResource("icons/cbr.gif"));
+		private ImageIcon ICON_XCBR = 
+			new ImageIcon(getClass().getResource("icons/xcbr.gif"));
+		private ImageIcon ICON_XML = 
+			new ImageIcon(getClass().getResource("icons/xml.gif"));
+		private ImageIcon ICON_XSD = 
+			new ImageIcon(getClass().getResource("icons/xsd.gif"));
+		private ImageIcon ICON_XSLT = 
+			new ImageIcon(getClass().getResource("icons/xslt.gif"));
+		private ImageIcon ICON_WSDL = 
+			new ImageIcon(getClass().getResource("icons/wsdl.gif"));
+		private ImageIcon ICON_JS = 
+			new ImageIcon(getClass().getResource("icons/js.gif"));
+		
+		private ImageIcon ICON_FILE = 
+			new ImageIcon(getClass().getResource("icons/file.gif"));
+		
+        public Component getTreeCellRendererComponent(
+        		JTree tree, Object value, boolean sel, boolean expanded,
+                boolean leaf, int row, boolean hasFocus) {
+
+				super.getTreeCellRendererComponent(
+						tree, value, sel, expanded, leaf, row, hasFocus);
+			if (leaf) {
+				Object userObject = ((DefaultMutableTreeNode)value).getUserObject();
+				if(userObject instanceof INode) {
+					String path = ((INode)userObject).getPath();
+					if(path.startsWith(ESBArtifact.PROCESS.getArchivePath()))
+						setIcon(ICON_ESBP);
+					else if(path.startsWith(ESBArtifact.CONTAINER.getArchivePath()))
+						setIcon(ICON_CONTAINER);
+					else if(path.startsWith(ESBArtifact.SERVICE_TYPE.getArchivePath()))
+						setIcon(ICON_ESBSTYP);
+					else if(path.startsWith(ESBArtifact.SERVICE.getArchivePath()))
+						setIcon(ICON_SERVICE);
+					else if(path.startsWith(ESBArtifact.ENDPOINT.getArchivePath()))
+						setIcon(ICON_ENDPOINT);
+					else if(path.toLowerCase().endsWith(".xml"))
+						setIcon(ICON_XML);
+					else if(path.toLowerCase().endsWith(".xsd"))
+						setIcon(ICON_XSD);
+					else if(path.toLowerCase().endsWith(".cbr"))
+						setIcon(ICON_CBR);
+					else if(path.toLowerCase().endsWith(".xcbr"))
+						setIcon(ICON_XCBR);
+					else if(path.toLowerCase().endsWith(".xslt") || path.endsWith(".xsl"))
+						setIcon(ICON_XSLT);
+					else if(path.toLowerCase().endsWith(".wsdl"))
+						setIcon(ICON_WSDL);
+					else if(path.toLowerCase().endsWith(".js"))
+						setIcon(ICON_JS);
+					else
+						setIcon(ICON_FILE);
+				}				
+			} else {
+			    setToolTipText(null); //no tool tip
+			}
+			
+			return this;
+		}
 	}
 }
