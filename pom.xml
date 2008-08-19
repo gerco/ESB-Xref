@@ -162,4 +162,18 @@
   		<version>2.1</version>
   	</dependency>
   </dependencies>
+  <repositories>
+     <repository>
+       <id>gdries.nl</id>
+       <name>Sonic.gdries.nl</name>
+       <url>https://sonic.gdries.nl/maven2</url>
+     </repository>
+   </repositories>
+   <distributionManagement>
+   	<repository>
+       <id>gdries.nl</id>
+       <name>gdries.nl</name>
+       <url>dav:https://sonic.gdries.nl/maven2</url>
+   	</repository>
+   </distributionManagement>
 </project>
