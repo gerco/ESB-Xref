@@ -114,7 +114,7 @@
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
-					<tagBase>https://sonic.gdries.nl/Tools/ESBXref/tags/</tagBase>
+					<tagBase>https://sonic.gdries.nl/svn/Tools/ESBXref/tags/</tagBase>
 				</configuration>
 			</plugin>
 		</plugins>
