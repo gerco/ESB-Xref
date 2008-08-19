@@ -37,6 +37,8 @@ public class UnusedArtifactReportTask extends Task {
 		FileWriter fw = new FileWriter(file);
 		PrintWriter pw = new PrintWriter(fw);
 		
+		pw.print("Used;Artifact name");
+		
 		for(INode n: allNodes) {
 			pw.print(unusedNodes.contains(n)? " ;" : "x;");
 			pw.println(n.getPath());

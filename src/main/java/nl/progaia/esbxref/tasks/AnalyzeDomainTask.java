@@ -1,7 +1,7 @@
 package nl.progaia.esbxref.tasks;
 
+import com.sonicsw.deploy.storage.DSArtifactStorage;
 import com.sonicsw.deploy.tools.gui.common.DomainConnectionModel;
-import com.sonicsw.pso.util.MFUtils;
 
 public class AnalyzeDomainTask extends AnalyzeArtifactStoreTask {
 	
@@ -26,13 +26,15 @@ public class AnalyzeDomainTask extends AnalyzeArtifactStoreTask {
 	
 	@Override
 	public void execute() throws Exception {
-		MFUtils utils = new MFUtils(domain, url, username, password);
-		
-		setStorage(utils.getDSArtifactStorage());
-		
-		super.execute();
-	
-		utils.cleanup();
+        DSArtifactStorage dsStore = new DSArtifactStorage();
+        dsStore.connect(domain, url, username, password);
+
+		try {
+			setStorage(dsStore);
+			super.execute();
+		} finally {
+			dsStore.disconnect();
+		}
 	}
 
 }

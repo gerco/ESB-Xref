@@ -92,10 +92,6 @@
 				<configuration>
 					<artifactItems>
 						<artifactItem>
-							<groupId>com.sonicsw.pso.utilities</groupId>
-							<artifactId>MFUtils</artifactId>
-						</artifactItem>
-						<artifactItem>
 							<groupId>com.sun.xml.bind</groupId>
 							<artifactId>jaxb-impl</artifactId>
 						</artifactItem>
@@ -141,11 +137,6 @@
 		</plugins>
 	</reporting>
 	<dependencies>
-		<dependency>
-			<groupId>com.sonicsw.pso.utilities</groupId>
-			<artifactId>MFUtils</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
