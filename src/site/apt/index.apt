@@ -1,0 +1,70 @@
+Introduction
+
+	ESBXref is a simple utility to allow a Sonic Consultant to quickly determine the
+	relationships between artifacts in a Sonic ESB domain.
+	
+Installation
+
+	Download the current stable release from the download page and unzip it somewhere. Then
+	simply double-click ESBXref-version.jar and the tool should start up. At the first start 
+	it will request that you provide the locations for your Sonic MQ and ESB installation
+	directories because it requires several jar files that are shipped with Sonic ESB to 
+	work.
+	
+	Once you have provided this information it is stored in the Windows registry (or whereever
+	your OS of choice stores preferences) and not asked for again.
+	
+	Upgrading the tool can be accomplished by removing the previous version and replacing it
+	with the updated version. There is no need to run an installer or anything like that. 
+	
+Usage
+	
+	* Creating the analysis
+	
+		In order to be able to display all relationships in a Sonic domain it must first be
+		analyzed. This analysis can take a fair amount of time to perform (10 minutes or more 
+		on a moderately sized developer installation) and puts quite a stress on the Sonic 
+		domain manager. I do not recommend performing an analysis of a live production domain!
+		
+		Analyze a backup copy of the production domain instead or create a XAR file containing
+		all artifacts and analyze that. Creating the xar file however also puts the domain
+		manager under quite a bit of stress, although not as much as running the analysis on the
+		directory service directly.
+		
+		Once a domain or xar file has been analyzed, you should save the result immediately. There
+		is no need to to keep analyzing the domain every time you want to check a dependency,
+		most of the time you won't be able to spare the patience to run the analysis again and
+		probably won't even bother to. 
+
+	* Browsing the artifacts
+		
+		Once you have an analysis loaded, click on any artifact in the left side of the window 
+		(the artifact tree) and the three tabs on the right side will display whatever information 
+		is available for that particular artifact. The "uses" tab displays what other artifacts 
+		this artifact depends on (or uses). The "where used" tab displays what other artifacts 
+		depend on this artifact.
+		
+		NOTE: Only direct links are displayed. If a process depends on a certain service instance 
+		and that instance, depends on some XSLT stylesheet (as an init parameter) it will not 
+		show up when looking at the process! The same goes for "Where used", only direct 
+		dependencies are displayed.
+		
+		The third tab "View" is currently only useful for ESB processes. It draws the process in 
+		the same way that Sonic Workbench does (although somewhat more limited). This picture is 
+		also saved in the xref file so it's always available.
+	
+	* Unused artifact report
+	
+		When a domain has been fully analyzed, ESBXref can automatically search for artifacts that
+		may not be used. This includes artifacts that have been in use previously, but are no longer
+		referred to by anything that has been deployed in an ESB container.
+		
+		When there are no references (direct or indirect) from an ESB container, an artifact is
+		marked as unused. This means that some artifacts will be marked as unused when they are not!
+		This includes ESB Endpoints that are references dynamically from a JavaScript rules file and 
+		also XSLT stylesheets and XML Schema documents that are imported or referenced only from other
+		XSLT stylesheets or XML Schema documents.
+		
+		Read the unused artifact report *very* carefully and *do not* just delete everying it believes
+		to be unused!
+		 

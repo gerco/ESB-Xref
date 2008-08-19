@@ -1,0 +1,19 @@
+Download
+
+	The current version of ESBXref is 0.9 and can be downloaded at
+	the following location (provided that you have the required privileges):
+	
+*--------------------------------------------------*-----------------------------------------------------------------------------------*
+|Binaries                                          |Source code                                                                        |
+*--------------------------------------------------*-----------------------------------------------------------------------------------*
+|{{{https://sonic.gdries.nl/releases/ESBXref-0.9-bin.zip}ESBXref-0.9-bin}}|{{{https://sonic.gdries.nl/maven2/nl/progaia/ESBXref/0.9/ESBXref-0.9-sources.jar}ESBXref-0.9-sources.jar}}|
+*--------------------------------------------------*-----------------------------------------------------------------------------------*
+
+	The current development version is 1.0-SNAPSHOT and can be checked out from here:
+	 
+*----------------------------*
+|Source code                 |
+*----------------------------*
+|{{https://sonic.gdries.nl/svn/Tools/ESBXref/trunk}}|
+*----------------------------*	
+	
