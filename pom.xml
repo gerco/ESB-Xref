@@ -13,8 +13,8 @@
 	</issueManagement>
 	<scm>
 		<!-- <connection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref</connection> -->
-		<developerConnection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref</developerConnection>
-		<url>https://sonic.gdries.nl/svn/Tools/ESBXref</url>
+		<developerConnection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</developerConnection>
+		<url>https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</url>
 	</scm>
 	<build>
 		<plugins>
@@ -108,7 +108,13 @@
 				<configuration>
 					<descriptors>
 						<descriptor>src/assembly/bin.xml</descriptor>
-					</descriptors>
+8					</descriptors>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<configuration>
+					<tagBase>https://sonic.gdries.nl/Tools/ESBXref/tags/</tagBase>
 				</configuration>
 			</plugin>
 		</plugins>
