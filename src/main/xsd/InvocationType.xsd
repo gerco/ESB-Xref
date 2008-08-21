@@ -4,7 +4,7 @@ targetNamespace="http://www.sonicsw.com/esb/service/invocation"
 xmlns:xq="http://www.sonicsw.com/sonicxq"
 xmlns:it="http://www.sonicsw.com/esb/service/invocation">
 
-	<xsd:import namespace="http://www.sonicsw.com/sonicxq" schemaLocation="file:///D:/Sonic75/ESB7.5/schema/InvocationAction.xsd"/>
+	<xsd:import namespace="http://www.sonicsw.com/sonicxq" schemaLocation="InvocationAction.xsd"/>
 
 	<xsd:complexType name="faultsType">
 		<xsd:sequence minOccurs="0" maxOccurs="unbounded">

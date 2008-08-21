@@ -30,7 +30,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>jaxb2-maven-plugin</artifactId>
-				<version>1.2</version>
 				<executions>
 					<execution>
 						<id>ESB-Schemas</id>
@@ -108,7 +107,7 @@
 				<configuration>
 					<descriptors>
 						<descriptor>src/assembly/bin.xml</descriptor>
-8					</descriptors>
+					</descriptors>
 				</configuration>
 			</plugin>
 			<plugin>

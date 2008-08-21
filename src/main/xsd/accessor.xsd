@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsd:schema targetNamespace="http://www.sonicsw.com/sonicxq" xmlns:xq="http://www.sonicsw.com/sonicxq" xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
-	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:include schemaLocation="common.xsd"/>
 	<xsd:element name="accessor">
 		<xsd:annotation>
 			<xsd:documentation>Comment describing your root element</xsd:documentation>

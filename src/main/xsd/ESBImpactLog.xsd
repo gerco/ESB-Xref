@@ -5,8 +5,8 @@
     elementFormDefault="qualified"
     attributeFormDefault="unqualified">
 
-    <xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/ESBDiffLog.xsd"/>
-    <xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/ESBDependencyLog.xsd"/>
+    <xsd:include schemaLocation="ESBDiffLog.xsd"/>
+    <xsd:include schemaLocation="ESBDependencyLog.xsd"/>
 
     <xsd:element name="ESBArtifactImpact" type="xq:ArtifactImpactListType"/>
 

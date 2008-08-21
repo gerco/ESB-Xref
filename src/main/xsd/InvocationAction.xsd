@@ -4,7 +4,7 @@ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 xmlns:xq="http://www.sonicsw.com/sonicxq" 
 targetNamespace="http://www.sonicsw.com/sonicxq">
 
-	<xsd:include schemaLocation="file:///D:/Sonic75/ESB7.5/schema/common.xsd"/>
+	<xsd:include schemaLocation="common.xsd"/>
 
 	<xsd:complexType name="invocationActionType">
 		<xsd:sequence>
