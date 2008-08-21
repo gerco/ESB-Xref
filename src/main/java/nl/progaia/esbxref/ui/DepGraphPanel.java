@@ -131,7 +131,7 @@ public class DepGraphPanel extends JPanel {
 		for(int i=0; i<root.getChildCount(); i++) {
 			TreeNode node = root.getChildAt(i);
 			
-			if(node.isLeaf() && node.toString().toLowerCase().startsWith(name.toLowerCase())) {
+			if(node.isLeaf() && node.toString().toLowerCase().contains(name.toLowerCase())) {
 				TreePath path = new TreePath(treeModel.getPathToRoot(node));
 				artifactTree.setSelectionPath(path);
 				artifactTree.scrollPathToVisible(path);

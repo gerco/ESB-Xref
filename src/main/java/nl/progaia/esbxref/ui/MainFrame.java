@@ -51,13 +51,16 @@ public class MainFrame extends JFrame {
 	private static final String PREF_WINDOW_X = PREF_ROOT + "x"; 
 	private static final String PREF_WINDOW_Y = PREF_ROOT + "y"; 
 	private static final String PREF_WINDOW_WIDTH = PREF_ROOT + "width"; 
-	private static final String PREF_WINDOW_HEIGHT = PREF_ROOT + "height"; 
+	private static final String PREF_WINDOW_HEIGHT = PREF_ROOT + "height";
+	private static final String PREF_OPEN_FILE = PREF_ROOT + "openFile";
+	private static final String PREF_LAST_DIR = PREF_ROOT + "lastDir";
 	
 	private JSplitPane splitPane;
 	private DepGraphPanel graphPanel;
 	private XRefResultsPanel resultsPanel;
 	private HistoryPanel historyPanel;
 
+	private File currentFile;
 	private String currentFilename;
 	private JStatusBar statusBar;
 	private final TaskExecutor worker;
@@ -74,10 +77,11 @@ public class MainFrame extends JFrame {
 	public MainFrame(TaskExecutor worker) {
 		super(WINDOW_TITLE);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new OpenPreviousFileWindowListener());
 		addWindowListener(new SavePrefsWindowListener());
 		
 		initComponents();
-		setCurrentFilename(null);
+		setCurrentFile(null);
 		
 		int x = prefs.getInt(PREF_WINDOW_X, -1);
 		int y = prefs.getInt(PREF_WINDOW_Y, -1);
@@ -102,7 +106,7 @@ public class MainFrame extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		setJMenuBar(initMenuBar());
 		
-		getContentPane().add(initHistoryPanel(), BorderLayout.NORTH);
+//		getContentPane().add(initHistoryPanel(), BorderLayout.NORTH);
 		
 		splitPane = new JSplitPane();
 		splitPane.setLeftComponent(initDepGraphView());
@@ -252,7 +256,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
-							setCurrentFilename("Untitled.xref");
+							setCurrentFile(new File("Untitled.xref"));
 						}
 					});
 					break;
@@ -303,7 +307,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
-							setCurrentFilename("Untitled.xref");
+							setCurrentFile(new File("Untitled.xref"));
 						}
 					});
 					break;
@@ -316,14 +320,22 @@ public class MainFrame extends JFrame {
 	
 	protected void saveAnalysis() {
 		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(getLastDir());
 		chooser.setAcceptAllFileFilterUsed(true);
 		chooser.addChoosableFileFilter(new ExtensionFileFilter(".xref", "Cross reference files"));
 		chooser.showDialog(this, "Save analysis");
 		
 		if(chooser.getSelectedFile() != null) {
-			final File file = chooser.getSelectedFile();
+			setLastDir(chooser.getCurrentDirectory());
+			File selectedFile = chooser.getSelectedFile();
+			
+			if(!selectedFile.getName().toLowerCase().endsWith(".xref"))
+				selectedFile = new File(selectedFile.getAbsolutePath() + ".xref");
+			
+			final File file = selectedFile;
 			final DependencyGraph graph = graphPanel.getDependencyGraph();
 			
+			setCurrentFile(file);
 			worker.execute(new Task() {
 				@Override
 				public void execute() throws Exception {
@@ -349,6 +361,7 @@ public class MainFrame extends JFrame {
 	
 	protected void loadAnalysis() {
 		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(getLastDir());
 		chooser.setAcceptAllFileFilterUsed(true);
 		chooser.addChoosableFileFilter(new ExtensionFileFilter(".xref", "Cross reference files"));
 		chooser.showDialog(this, "Load analysis");
@@ -356,8 +369,11 @@ public class MainFrame extends JFrame {
 		if(chooser.getSelectedFile() == null)
 			return;
 
-		final File file = chooser.getSelectedFile();
-		
+		setLastDir(chooser.getCurrentDirectory());
+		loadAnalysis(chooser.getSelectedFile());
+	}
+	
+	protected void loadAnalysis(final File file) {
 		Task t = new Task() {
 			private DependencyGraph graph;
 			
@@ -393,7 +409,7 @@ public class MainFrame extends JFrame {
 					SwingUtilities.invokeLater(new Runnable() {
 						public void run() {
 							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
-							setCurrentFilename(file.getName());
+							setCurrentFile(file);
 						}
 					});
 					break;
@@ -407,11 +423,13 @@ public class MainFrame extends JFrame {
 	
 	protected void exportToCSV() {
 		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(getLastDir());
 		chooser.setAcceptAllFileFilterUsed(true);
 		chooser.addChoosableFileFilter(new ExtensionFileFilter(".csv", "CSV files"));
 		chooser.showDialog(this, "Export to CSV");
 		
 		if(chooser.getSelectedFile() != null) {
+			setLastDir(chooser.getCurrentDirectory());
 			final File file = chooser.getSelectedFile();
 			final DependencyGraph graph = graphPanel.getDependencyGraph();
 			
@@ -431,11 +449,13 @@ public class MainFrame extends JFrame {
 	
 	protected void exportToHTML() {
 		JFileChooser chooser = new JFileChooser();
+		chooser.setCurrentDirectory(getLastDir());
 		chooser.setAcceptAllFileFilterUsed(true);
 		chooser.addChoosableFileFilter(new ExtensionFileFilter(".html", "HTML files"));
 		chooser.showDialog(this, "Export to HTML");
 		
 		if(chooser.getSelectedFile() != null) {
+			setLastDir(chooser.getCurrentDirectory());
 			final File file = chooser.getSelectedFile();
 			final DependencyGraph graph = graphPanel.getDependencyGraph();
 			
@@ -471,12 +491,34 @@ public class MainFrame extends JFrame {
 		System.exit(0);
 	}
 	
+	public void setLastDir(File dir) {
+		prefs.put(PREF_LAST_DIR, dir.getAbsolutePath());
+	}
+	
+	public File getLastDir() {
+		String dirname = prefs.get(PREF_LAST_DIR, null);
+		
+		if(dirname == null || dirname.length()==0)
+			return null;
+		
+		File dir = new File(dirname);
+		if(dir.exists() && dir.isDirectory())
+			return dir;
+		
+		return null;
+	}
+	
 	public String getCurrentFilename() {
 		return currentFilename;
 	}
 
-	public void setCurrentFilename(String currentFilename) {
-		this.currentFilename = currentFilename;
+	public File getCurrentFile() {
+		return this.currentFile;
+	}
+	
+	public void setCurrentFile(File file) {
+		this.currentFile = file;
+		this.currentFilename = file != null ? file.getName() : null;
 		
 		if(getCurrentFilename() == null) {
 			setTitle(WINDOW_TITLE);
@@ -541,6 +583,28 @@ public class MainFrame extends JFrame {
 	}
 
 	/**
+	 * Load the last open file if there is one.
+	 * @author gerco
+	 *
+	 */
+	private class OpenPreviousFileWindowListener extends WindowAdapter {
+
+		/* (non-Javadoc)
+		 * @see java.awt.event.WindowAdapter#windowOpened(java.awt.event.WindowEvent)
+		 */
+		@Override
+		public void windowOpened(WindowEvent e) {
+			String fileName = prefs.get(PREF_OPEN_FILE, "");
+			if(fileName != null && fileName.length() > 0) {
+				File file = new File(fileName);
+				if(file.exists() && file.canRead())
+					loadAnalysis(file);
+			}
+		}
+		
+	}
+	
+	/**
 	 * This class saves the preferences when the window is about to close.
 	 * 
 	 * @author Gerco Dries (gdr@progaia-rs.nl)
@@ -554,6 +618,12 @@ public class MainFrame extends JFrame {
 			prefs.putInt(PREF_WINDOW_Y, getLocation().y);
 			prefs.putInt(PREF_WINDOW_WIDTH, getSize().width);
 			prefs.putInt(PREF_WINDOW_HEIGHT, getSize().height);
+			
+			System.out.println(currentFile);
+			if(currentFile != null && currentFile.exists())
+				prefs.put(PREF_OPEN_FILE, currentFile.getAbsolutePath());
+			else
+				prefs.remove(PREF_OPEN_FILE);
 		}
 	}
 	
