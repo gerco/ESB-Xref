@@ -95,10 +95,6 @@ public class XRefResultsPanel extends JPanel {
 	public NodeSelectionListener getSelectionListener() {
 		return selectionListener;
 	}
-
-	public interface NodeSelectionListener {
-		public void nodeSelected(INode node);
-	}	
 	
 	private class DoubleClickListener extends MouseAdapter {
 

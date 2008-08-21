@@ -34,8 +34,6 @@ import nl.progaia.esbxref.task.TaskExecutor;
 import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
 import nl.progaia.esbxref.tasks.AnalyzeXARTask;
 import nl.progaia.esbxref.tasks.UnusedArtifactReportTask;
-import nl.progaia.esbxref.ui.DepGraphPanel.DepGraphSelectionListener;
-import nl.progaia.esbxref.ui.XRefResultsPanel.NodeSelectionListener;
 import nl.progaia.esbxref.ui.status.JStatusBar;
 
 import com.sonicsw.deploy.tools.gui.common.DomainConnectionDialog;
@@ -58,6 +56,7 @@ public class MainFrame extends JFrame {
 	private JSplitPane splitPane;
 	private DepGraphPanel graphPanel;
 	private XRefResultsPanel resultsPanel;
+	private HistoryPanel historyPanel;
 
 	private String currentFilename;
 	private JStatusBar statusBar;
@@ -103,6 +102,8 @@ public class MainFrame extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		setJMenuBar(initMenuBar());
 		
+		getContentPane().add(initHistoryPanel(), BorderLayout.NORTH);
+		
 		splitPane = new JSplitPane();
 		splitPane.setLeftComponent(initDepGraphView());
 		splitPane.setRightComponent(initResultsPanel());
@@ -111,6 +112,11 @@ public class MainFrame extends JFrame {
 		getContentPane().add(splitPane, BorderLayout.CENTER);
 		
 		getContentPane().add(initStatusBar(), BorderLayout.SOUTH);
+	}
+
+	private HistoryPanel initHistoryPanel() {
+		historyPanel = new HistoryPanel();
+		return historyPanel;
 	}
 
 	private XRefResultsPanel initResultsPanel() {
@@ -127,10 +133,13 @@ public class MainFrame extends JFrame {
 
 	private DepGraphPanel initDepGraphView() {
 		graphPanel = new DepGraphPanel();
-		graphPanel.setSelectionListener(new DepGraphSelectionListener() {
+		graphPanel.setSelectionListener(new NodeSelectionListener() {
 			public void nodeSelected(INode selectedNode) {
 				if(resultsPanel != null)
 					resultsPanel.setDisplayedNode(selectedNode);
+				
+				if(historyPanel != null)
+					historyPanel.addHistoryNode(selectedNode);
 			}
 		});
 		return graphPanel;

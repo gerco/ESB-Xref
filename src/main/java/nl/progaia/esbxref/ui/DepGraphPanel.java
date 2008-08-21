@@ -2,12 +2,18 @@ package nl.progaia.esbxref.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.Timer;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -24,24 +30,23 @@ import nl.progaia.esbxref.dep.INode;
 import com.sonicsw.deploy.artifact.ESBArtifact;
 
 public class DepGraphPanel extends JPanel {
-	public interface DepGraphSelectionListener {
-		public void nodeSelected(INode selectedNode);
-	}
-
 	private static final long serialVersionUID = 1L;
+	
+	private JTextField searchField;
+	private Timer searchTimer;
 	
 	private DependencyGraph graph;
 	private DefaultMutableTreeNode rootNode;
 	private DefaultTreeModel treeModel;
 	private JTree artifactTree;
 	
-	private DepGraphSelectionListener selectionListener;
+	private NodeSelectionListener selectionListener;
 	
 	public DepGraphPanel() {
 		setLayout(new BorderLayout());
 		
 		// Set up a dummy selectionListener
-		selectionListener = new DepGraphSelectionListener() {
+		selectionListener = new NodeSelectionListener() {
 			public void nodeSelected(INode selectedNode) {
 				System.out.println("Node " + selectedNode + " selected, but no-one cared!");
 			}
@@ -51,6 +56,37 @@ public class DepGraphPanel extends JPanel {
 	}
 
 	private void initComponents() {
+		initSearchField();
+		initArtifactTree();
+	}
+	
+	private void initSearchField() {
+		searchField = new JTextField();
+		searchTimer = new Timer(500, new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				searchAndSelectNode(searchField.getText());
+				searchTimer.stop();
+			}			
+		});
+		
+		searchField.getDocument().addDocumentListener(new DocumentListener() {
+			public void changedUpdate(DocumentEvent arg0) {
+				// Only used in StyledDocuments
+			}
+
+			public void insertUpdate(DocumentEvent e) {
+				searchTimer.restart();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				searchTimer.restart();
+			}			
+		});
+		
+		add(searchField, BorderLayout.NORTH);
+	}
+	
+	private void initArtifactTree() {
 		rootNode = new DefaultMutableTreeNode("Configured objects");
 		treeModel = new DefaultTreeModel(rootNode);
 		
@@ -81,9 +117,33 @@ public class DepGraphPanel extends JPanel {
 				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		
-		add(scrollPane);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 	
+	private void searchAndSelectNode(String name) {
+		if(name.length() == 0)
+			return;
+		
+		searchAndSelectNode(name, rootNode);
+	}
+	
+	private boolean searchAndSelectNode(String name, TreeNode root) {
+		for(int i=0; i<root.getChildCount(); i++) {
+			TreeNode node = root.getChildAt(i);
+			
+			if(node.isLeaf() && node.toString().toLowerCase().startsWith(name.toLowerCase())) {
+				TreePath path = new TreePath(treeModel.getPathToRoot(node));
+				artifactTree.setSelectionPath(path);
+				artifactTree.scrollPathToVisible(path);
+				return true;
+			} else if(node.getChildCount()>0 && searchAndSelectNode(name, node)) {
+				return true;
+			}
+		}
+	
+		return false;
+	}
+
 	public void selectNode(INode node) {
 		TreePath treePath = new TreePath(rootNode);
 		String[] nodePath = node.getPath().split("/");
@@ -105,8 +165,6 @@ public class DepGraphPanel extends JPanel {
 		artifactTree.setSelectionPath(treePath);
 		artifactTree.scrollPathToVisible(treePath);
 	}
-	
-	
 	
 	public void setDependencyGraph(DependencyGraph graph) {
 		this.graph = graph;
@@ -149,11 +207,11 @@ public class DepGraphPanel extends JPanel {
 		return graph;
 	}
 
-	public void setSelectionListener(DepGraphSelectionListener selectionListener) {
+	public void setSelectionListener(NodeSelectionListener selectionListener) {
 		this.selectionListener = selectionListener;
 	}
 
-	public DepGraphSelectionListener getSelectionListener() {
+	public NodeSelectionListener getSelectionListener() {
 		return selectionListener;
 	}
 	
