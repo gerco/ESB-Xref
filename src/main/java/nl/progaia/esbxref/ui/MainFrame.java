@@ -487,6 +487,7 @@ public class MainFrame extends JFrame {
 	}
 	
 	protected void quit() {
+		setVisible(false);
 		dispose();
 		System.exit(0);
 	}
@@ -619,7 +620,6 @@ public class MainFrame extends JFrame {
 			prefs.putInt(PREF_WINDOW_WIDTH, getSize().width);
 			prefs.putInt(PREF_WINDOW_HEIGHT, getSize().height);
 			
-			System.out.println(currentFile);
 			if(currentFile != null && currentFile.exists())
 				prefs.put(PREF_OPEN_FILE, currentFile.getAbsolutePath());
 			else
