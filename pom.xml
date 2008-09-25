@@ -4,7 +4,7 @@
 	<groupId>nl.progaia</groupId>
 	<artifactId>ESBXref</artifactId>
 	<name>ESBXref</name>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<url>https://sonic.gdries.nl/projects/esbxref</url>
 	<description>Cross reference tool for Sonic ESB</description>
 	<issueManagement>
@@ -13,8 +13,8 @@
 	</issueManagement>
 	<scm>
 		<!-- <connection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref</connection> -->
-		<developerConnection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</developerConnection>
-		<url>https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</url>
+		<developerConnection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref/tags/ESBXref-1.0</developerConnection>
+		<url>https://sonic.gdries.nl/svn/Tools/ESBXref/tags/ESBXref-1.0</url>
 	</scm>
 	<build>
 		<plugins>
