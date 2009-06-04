@@ -1,6 +1,7 @@
 package nl.progaia.esbxref.launcher;
 
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
@@ -12,6 +13,7 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class SonicLocationsDialog extends JDialog {
@@ -32,6 +34,7 @@ public class SonicLocationsDialog extends JDialog {
 	
 	public SonicLocationsDialog() {
 		dialog = this;
+		
 		initComponents();
 		wireComponents();
 		pack();
@@ -87,17 +90,29 @@ public class SonicLocationsDialog extends JDialog {
 	
 	private void initComponents() {
 		setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		
+		setPreferredSize(new Dimension(500, 300));
 		Container contentPane = getContentPane();
 		
-		contentPane.add(new JLabel(
-				"Please provide the locations of your Sonic MQ and Sonic ESB installation " +
-				"directories in order to start the program. Only Sonic 7.5 is supported!"));
+		JTextArea label;
+		contentPane.add(label = new JTextArea());
+		label.setText(
+			"Please provide the locations of your Sonic MQ and Sonic ESB installation " +
+			"directories in order to start the program. Only Sonic 7.5 and 7.6 are " +
+			"supported!");
+		label.setLineWrap(true);
+		label.setWrapStyleWord(true);
+		label.setOpaque(false);
+		label.setFont(new JLabel().getFont());
 		
 		JPanel mqHomePanel = new JPanel();
 		mqHomePanel.setLayout(new BoxLayout(mqHomePanel, BoxLayout.X_AXIS));
-		mqHomePanel.add(new JLabel("Sonic MQ 7.5:"));
+		mqHomePanel.add(new JLabel("Sonic MQ:"));
 		mqHomePanel.add(Box.createHorizontalStrut(5));
-		mqHomePanel.add(mqHomeField = new JTextField(30));
+		mqHomePanel.add(mqHomeField = new JTextField(15));
+		mqHomeField.setMaximumSize(new Dimension(
+			mqHomeField.getMaximumSize().width,
+			mqHomeField.getPreferredSize().height));
 		mqHomePanel.add(Box.createHorizontalStrut(5));
 		mqHomePanel.add(mqHomeBrowseButton = new JButton("Browse..."));
 		contentPane.add(mqHomePanel);
@@ -106,9 +121,12 @@ public class SonicLocationsDialog extends JDialog {
 		
 		JPanel xqHomePanel = new JPanel();
 		xqHomePanel.setLayout(new BoxLayout(xqHomePanel, BoxLayout.X_AXIS));
-		xqHomePanel.add(new JLabel("Sonic ESB 7.5:"));
+		xqHomePanel.add(new JLabel("Sonic ESB:"));
 		xqHomePanel.add(Box.createHorizontalStrut(5));
-		xqHomePanel.add(xqHomeField = new JTextField(30));
+		xqHomePanel.add(xqHomeField = new JTextField(15));
+		xqHomeField.setMaximumSize(new Dimension(
+			xqHomeField.getMaximumSize().width,
+			xqHomeField.getPreferredSize().height));
 		xqHomePanel.add(Box.createHorizontalStrut(5));
 		xqHomePanel.add(xqHomeBrowseButton = new JButton("Browse..."));
 		contentPane.add(xqHomePanel);

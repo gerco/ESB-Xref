@@ -5,16 +5,16 @@
 	<artifactId>ESBXref</artifactId>
 	<name>ESBXref</name>
 	<version>1.1-SNAPSHOT</version>
-	<url>https://sonic.gdries.nl/projects/esbxref</url>
+	<url>http://sonic.gdries.nl/projects/esbxref</url>
 	<description>Cross reference tool for Sonic ESB</description>
 	<issueManagement>
 		<system>Trac</system>
-		<url>https://sonic.gdries.nl</url>
+		<url>http://sonic.gdries.nl</url>
 	</issueManagement>
 	<scm>
-		<!-- <connection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref</connection> -->
-		<developerConnection>scm:svn:https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</developerConnection>
-		<url>https://sonic.gdries.nl/svn/Tools/ESBXref/trunk</url>
+		<!-- <connection>scm:svn:http://sonic.gdries.nl/svn/Tools/ESBXref</connection> -->
+		<developerConnection>scm:svn:http://sonic.gdries.nl/svn/Tools/ESBXref/trunk</developerConnection>
+		<url>http://sonic.gdries.nl/svn/Tools/ESBXref/trunk</url>
 	</scm>
 	<build>
 		<plugins>
@@ -113,7 +113,7 @@
 			<plugin>
 				<artifactId>maven-release-plugin</artifactId>
 				<configuration>
-					<tagBase>https://sonic.gdries.nl/svn/Tools/ESBXref/tags/</tagBase>
+					<tagBase>http://sonic.gdries.nl/svn/Tools/ESBXref/tags/</tagBase>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -190,18 +190,18 @@
 		<repository>
 			<id>gdries.nl</id>
 			<name>Sonic.gdries.nl</name>
-			<url>https://sonic.gdries.nl/maven2</url>
+			<url>http://sonic.gdries.nl/maven2</url>
 		</repository>
 	</repositories>
 	<distributionManagement>
 		<repository>
 			<id>gdries.nl</id>
 			<name>gdries.nl</name>
-			<url>dav:https://sonic.gdries.nl/maven2</url>
+			<url>dav:http://sonic.gdries.nl/maven2</url>
 		</repository>
 		<site>
 			<id>gdries.nl</id>
-			<url>dav:https://sonic.gdries.nl/projects/esbxref</url>
+			<url>dav:http://sonic.gdries.nl/projects/esbxref</url>
 		</site>
 	</distributionManagement>
 </project>

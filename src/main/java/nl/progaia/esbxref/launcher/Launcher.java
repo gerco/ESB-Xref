@@ -1,5 +1,6 @@
 package nl.progaia.esbxref.launcher;
 
+import java.awt.Toolkit;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,6 +10,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
+
+import javax.swing.UIManager;
 
 public class Launcher {
 
@@ -38,6 +41,7 @@ public class Launcher {
 	private final static String[] xqJars = new String[] {
 		"xq_config.jar",
 		"xq_core.jar",
+		"xq_admin.jar", // ESB 7.6
 		"jsr173_api.jar",
 		"sonic_deploy.jar"
 	};
@@ -53,7 +57,7 @@ public class Launcher {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-//		System.out.println(Thread.currentThread().getContextClassLoader());
+		boolean reset = args.length > 0 && "reset".equalsIgnoreCase(args[0]);
 		
 		do {
 			String mqHome = prefs.get(PREF_MQ_HOME, "");
@@ -61,8 +65,9 @@ public class Launcher {
 			
 			boolean mqHomeGood = new File(new File(mqHome), "lib/sonic_Client.jar").exists();
 			boolean xqHomeGood = new File(new File(xqHome), "lib/xq_core.jar").exists();
+			System.err.println(mqHomeGood + " " + xqHomeGood + " " + reset);
 
-			if(mqHomeGood && xqHomeGood) {
+			if(mqHomeGood && xqHomeGood && !reset) {
 				try {
 					System.setProperty("com.sonicsw.xq.home", xqHome);
 					setClassLoaderAndLaunch(
@@ -80,6 +85,8 @@ public class Launcher {
 				// anymore.
 				break;
 			}
+			
+			reset = false;
 		} while (askUserForHomeLocations());
 	}
 
@@ -89,6 +96,9 @@ public class Launcher {
 	 */
 	private static void setClassLoaderAndLaunch(File mqLib, File xqLib, String[] args) throws MalformedURLException {
 		List<URL> urls = new ArrayList<URL>();
+		
+		System.out.println("MQ_LIB: " + mqLib);
+		System.out.println("XQ_LIB: " + xqLib);
 		
 		// Construct the list of URLs from the jar names
 		for(String name: myJars) {
@@ -145,4 +155,13 @@ public class Launcher {
 		}
 	}
 	
+	static {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			if(Boolean.TRUE.equals(Toolkit.getDefaultToolkit().getDesktopProperty("awt.dynamicLayoutSupported")))
+				Toolkit.getDefaultToolkit().setDynamicLayout(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
