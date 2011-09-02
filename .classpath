@@ -7,13 +7,9 @@
 	<classpathentry kind="var" path="M2_REPO/javax/activation/activation/1.1/activation-1.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/xml/bind/jaxb-api/2.1/jaxb-api-2.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/javax/xml/stream/stax-api/1.0-2/stax-api-1.0-2.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/sonicsw/mq/libs/axis/7.5.1/axis-7.5.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/sonicsw/mq/libs/commons-discovery/7.5.1/commons-discovery-7.5.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/com/sun/xml/bind/jaxb-impl/2.1.3/jaxb-impl-2.1.3.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/sonicsw/mq/libs/jaxrpc/7.5.1/jaxrpc-7.5.1.jar"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/4.4/junit-4.4.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/sonicsw/mq/libs/saaj/7.5.1/saaj-7.5.1.jar"/>
-	<classpathentry kind="var" path="M2_REPO/com/sonicsw/xq/libs/sonic_deploy/7.5.1/sonic_deploy-7.5.1.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/Sonic 7.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.5.0_22"/>
+	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

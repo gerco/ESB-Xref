@@ -31,13 +31,10 @@ import nl.progaia.esbxref.events.EventListener;
 import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskEvent;
 import nl.progaia.esbxref.task.TaskExecutor;
-import nl.progaia.esbxref.tasks.AnalyzeDomainTask;
+import nl.progaia.esbxref.tasks.AnalyzeSDMTask;
 import nl.progaia.esbxref.tasks.AnalyzeXARTask;
 import nl.progaia.esbxref.tasks.UnusedArtifactReportTask;
 import nl.progaia.esbxref.ui.status.JStatusBar;
-
-import com.sonicsw.deploy.tools.gui.common.DomainConnectionDialog;
-import com.sonicsw.deploy.tools.gui.common.DomainConnectionModel;
 
 public class MainFrame extends JFrame {
 
@@ -65,8 +62,8 @@ public class MainFrame extends JFrame {
 	private JStatusBar statusBar;
 	private final TaskExecutor worker;
 
-	private JMenuItem analyzeDomainItem;
 	private JMenuItem analyzeXARItem;
+	private JMenuItem analyzeSDMItem;
 	private JMenuItem saveAnalysisItem;
 	private JMenuItem loadAnalysisItem;
 	private JMenuItem findUnusedItem;
@@ -74,8 +71,11 @@ public class MainFrame extends JFrame {
 	private JMenuItem exportToCSVItem;
 	private JMenuItem exportToHTMLItem;
 
+
 	public MainFrame(TaskExecutor worker) {
 		super(WINDOW_TITLE);
+		this.worker = worker;
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		addWindowListener(new OpenPreviousFileWindowListener());
 		addWindowListener(new SavePrefsWindowListener());
@@ -99,7 +99,6 @@ public class MainFrame extends JFrame {
 		
 		worker.addListener(new TaskEventListener(this));
 		worker.addListener(new StatusBarManipulator());
-		this.worker = worker;
 	}
 
 	private void initComponents() {
@@ -124,7 +123,7 @@ public class MainFrame extends JFrame {
 //	}
 
 	private XRefResultsPanel initResultsPanel() {
-		resultsPanel = new XRefResultsPanel();
+		resultsPanel = new XRefResultsPanel(worker);
 		resultsPanel.setSelectionListener(new NodeSelectionListener() {
 			public void nodeSelected(INode node) {
 				if(graphPanel != null) {
@@ -159,18 +158,18 @@ public class MainFrame extends JFrame {
 		
 		JMenu fileMenu = new JMenu("File");
 		JMenu analyzeMenu = new JMenu("Analyze");
-		
-		analyzeDomainItem = new JMenuItem("Analyze domain...");
-		analyzeDomainItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				analyzeDomain();
-			}
-		});
-		
+				
 		analyzeXARItem = new JMenuItem("Analyze xar file...");
 		analyzeXARItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				analyzeXAR();
+			}
+		});
+		
+		analyzeSDMItem = new JMenuItem("Analyze SDM model...");
+		analyzeSDMItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				analyzeSDM();
 			}
 		});
 		
@@ -226,8 +225,8 @@ public class MainFrame extends JFrame {
 		fileMenu.add(quitItem);
 		
 		// Assemble the Analyze menu
-		analyzeMenu.add(analyzeDomainItem);		
 		analyzeMenu.add(analyzeXARItem);
+		analyzeMenu.add(analyzeSDMItem);
 		analyzeMenu.insertSeparator(2);
 		analyzeMenu.add(findUnusedItem);
 		
@@ -236,51 +235,7 @@ public class MainFrame extends JFrame {
 		
 		return menuBar;
 	}
-	
-	protected void analyzeDomain() {
-		DomainConnectionModel model = getConnectionModel();
-
-		if(model == null)
-			return;
 		
-		Task t = new AnalyzeDomainTask(model);
-		t.addListener(new EventListener<TaskEvent>() {
-			public void processEvent(final TaskEvent event) {
-				switch(event.getId()) {
-				
-				case TASK_ERROR:
-					((Task)event.getSource()).removeListener(this);
-					break;
-					
-				case TASK_FINISHED:
-					SwingUtilities.invokeLater(new Runnable() {
-						public void run() {
-							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
-							setCurrentFile(new File("Untitled.xref"));
-						}
-					});
-					break;
-					
-				}
-			}
-		});
-		worker.execute(t);
-	}
-	
-	private DomainConnectionModel getConnectionModel() {
-        DomainConnectionDialog dialog;
-        dialog = new DomainConnectionDialog(this);
-        
-//        DomainConnectionModel model = new DomainConnectionModel();
-        dialog.setLocationRelativeTo(this);
-        dialog.pack();
-        dialog.setVisible(true);
-        if(!dialog.isOK())
-            return null;
-        
-        return dialog.getModel();
-	}
-	
 	protected void analyzeXAR() {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setAcceptAllFileFilterUsed(true);
@@ -312,6 +267,44 @@ public class MainFrame extends JFrame {
 					});
 					break;
 					
+				}
+			}
+		});
+		worker.execute(t);
+	}
+	
+	protected void analyzeSDM() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setAcceptAllFileFilterUsed(true);
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.showDialog(this, "Analyze SDM model");
+		
+		if(chooser.getSelectedFile() == null)
+			return;
+
+		final File file = chooser.getSelectedFile();
+		if(file == null)
+			return;
+		if(!file.isDirectory())
+			return;
+		
+		Task t = new AnalyzeSDMTask(file);
+		t.addListener(new EventListener<TaskEvent>() {
+			public void processEvent(final TaskEvent event) {
+				switch(event.getId()) {
+				
+				case TASK_ERROR:
+					((Task)event.getSource()).removeListener(this);
+					break;
+					
+				case TASK_FINISHED:
+					SwingUtilities.invokeLater(new Runnable() {
+						public void run() {
+							graphPanel.setDependencyGraph((DependencyGraph) event.getInfo());
+							setCurrentFile(new File("Untitled.xref"));
+						}
+					});
+					break;
 				}
 			}
 		});

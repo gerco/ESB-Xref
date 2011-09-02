@@ -22,6 +22,10 @@ public class ESBProcess extends ESBItinerary {
 	public String getName() {
 		return process.getName();
 	}
+	
+	public Process getProcess() {
+		return process;
+	}
 
 	public static Drawable getProcess(String name) {
 //		Process p = Main.getArtifactStore().getProcess(name);

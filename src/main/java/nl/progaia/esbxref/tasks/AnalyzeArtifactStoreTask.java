@@ -141,7 +141,7 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 					
 		// Add the artifact to the graph and link the dependencies accordingly
 		ArtifactNode n = (ArtifactNode)graph.addArtifact(root, dependencies);
-		if(n != null && n.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
+		if(n != null && n.getPath().startsWith(ESBArtifact.ROOT.getArchivePath())) {
 			n.setArtifactXml(storage.getContentsAsString(root));
 		}
 		

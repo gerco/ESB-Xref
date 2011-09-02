@@ -7,29 +7,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+
+import com.sonicsw.deploy.artifact.ESBArtifact;
 
 import nl.progaia.esbprocessdraw.ProcessRenderer;
 import nl.progaia.esbprocessdraw.draw.esb.ESBProcess;
 import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.INode;
+import nl.progaia.esbxref.task.Task;
+import nl.progaia.esbxref.task.TaskExecutor;
+import nl.progaia.esbxref.ui.infopanels.EndpointInfoPanel;
+import nl.progaia.esbxref.ui.infopanels.GenericInfoPanel;
+import nl.progaia.esbxref.ui.infopanels.ProcessInfoPanel;
+import nl.progaia.esbxref.ui.infopanels.ServiceInfoPanel;
 
 public class XRefResultsPanel extends JPanel {
-
 	private JTable usesTable;
 	private JTable whereUsedTable;
-	private ESBProcessPanel viewArea;
+	
+	private JPanel infoPanel;
+	private GenericInfoPanel genericInfoPanel = new GenericInfoPanel();
+	private ProcessInfoPanel processInfoPanel = new ProcessInfoPanel();
+	private EndpointInfoPanel endpointInfoPanel = new EndpointInfoPanel();
+	private ServiceInfoPanel serviceInfoPanel = new ServiceInfoPanel();
 	
 	private NodeListTableModel usesTableModel;
 	private NodeListTableModel whereUsedTableModel;
 	
 	private NodeSelectionListener selectionListener;
+	private JTabbedPane tabbedPane;
 	
-	public XRefResultsPanel() {
+	private TaskExecutor worker;
+	
+	public XRefResultsPanel(TaskExecutor worker) {
+		this.worker = worker;
 		setLayout(new BorderLayout());
+
+		infoPanel = new JPanel();
+		infoPanel.setLayout(new BorderLayout());
 		
 		// Create tablemodels
 		usesTableModel = new NodeListTableModel();
@@ -48,11 +69,8 @@ public class XRefResultsPanel extends JPanel {
 			}
 		});
 		
-		// Create the view area
-		viewArea = new ESBProcessPanel();
-		
-		// Now add the tables to a tabbedpane
-		JTabbedPane tabbedPane = new JTabbedPane();
+		tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Info", infoPanel);
 		tabbedPane.addTab("Uses", 
 				new JScrollPane(usesTable,
 						JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
@@ -61,31 +79,71 @@ public class XRefResultsPanel extends JPanel {
 			new JScrollPane(whereUsedTable,
 					JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
-		tabbedPane.addTab("View",
-			new JScrollPane(viewArea,
-					JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-					JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS));
 		
 		add(tabbedPane, BorderLayout.CENTER);
+		displayNullNode();
 	}
 	
 	public void setDisplayedNode(INode displayedNode) {
-		if(displayedNode != null) {
-			usesTableModel.setData(displayedNode.getIUse());
-			whereUsedTableModel.setData(displayedNode.getUsedBy());
-			
-			if(displayedNode instanceof ArtifactNode) {
-				ESBProcess p = ProcessRenderer.unmarshalProcess(
-						((ArtifactNode)displayedNode).getArtifactXml());
-				viewArea.setProcess(p);
-			} else {
-				viewArea.setProcess(null);
-			}
-		} else {
-			usesTableModel.setData(null);
-			whereUsedTableModel.setData(null);
-			viewArea.setProcess(null);
+		if(displayedNode == null) {
+			displayNullNode();
+			return;
 		}
+		
+		tabbedPane.setEnabledAt(1, true);
+		usesTableModel.setData(displayedNode.getIUse());
+		tabbedPane.setEnabledAt(2, true);
+		whereUsedTableModel.setData(displayedNode.getUsedBy());
+
+		if(displayedNode instanceof ArtifactNode) {
+			final ArtifactNode artifactNode = (ArtifactNode)displayedNode;
+			tabbedPane.setEnabledAt(0, true);
+			
+			if(artifactNode.getPath().startsWith(ESBArtifact.PROCESS.getArchivePath())) {
+				Task t = new Task() {
+					@Override
+					public void execute() throws Exception {
+						final ESBProcess p = ProcessRenderer.unmarshalProcess(artifactNode.getArtifactXml());
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								processInfoPanel.setProcess(p);
+								setInfoComponent(processInfoPanel);
+							}
+						});
+					}
+					@Override
+					public String toString() {
+						return "Loading process";
+					}
+				};
+				worker.execute(t);
+			} else if(artifactNode.getPath().startsWith(ESBArtifact.ENDPOINT.getArchivePath())) {
+				endpointInfoPanel.setEndpoint(artifactNode);
+				setInfoComponent(endpointInfoPanel);
+			} else if(artifactNode.getPath().startsWith(ESBArtifact.SERVICE.getArchivePath())) {
+				serviceInfoPanel.setService(artifactNode);
+				setInfoComponent(serviceInfoPanel);
+			} else {
+				genericInfoPanel.setNode(artifactNode);
+				setInfoComponent(genericInfoPanel);
+			}
+		}
+	}
+
+	private void setInfoComponent(JComponent component) {
+		infoPanel.removeAll();
+		if(component != null)
+			infoPanel.add(component, BorderLayout.CENTER);
+		infoPanel.revalidate();
+	}
+	
+	private void displayNullNode() {
+		tabbedPane.setEnabledAt(0, false);
+		tabbedPane.setEnabledAt(1, false);
+		tabbedPane.setEnabledAt(2, false);
+		setInfoComponent(null);
+		usesTableModel.setData(null);
+		whereUsedTableModel.setData(null);
 	}
 	
 	public void setSelectionListener(NodeSelectionListener selectionListener) {
