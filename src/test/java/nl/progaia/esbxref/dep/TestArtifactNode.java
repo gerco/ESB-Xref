@@ -31,39 +31,39 @@ public class TestArtifactNode {
 	}
 
 	@Test
-	public void testAddIUse() {
+	public void testAddOutgoing() {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependantArtifact");
 		
 		INode na = new ArtifactNode(a);
 		ArtifactNode nb = new ArtifactNode(b);
 		
-		assertEquals(na.getIUse().size(), 0);
-		na.addIUse(nb);
+		assertEquals(na.getOutgoing().size(), 0);
+		na.addOutgoing(new Link(na, nb, false));
 		
-		assertEquals(na.getIUse().size(), 1);
-		na.addIUse(nb);
+		assertEquals(na.getOutgoing().size(), 1);
+		na.addOutgoing(new Link(na, nb, false));
 		
-		assertEquals(na.getIUse().size(), 1);
-		assertTrue(na.getIUse().contains(nb));
+		assertEquals(na.getOutgoing().size(), 1);
+		assertTrue(na.uses(nb));
 	}
 
 	@Test
-	public void testAddUsedBy() {
+	public void testAddIncoming() {
 		IArtifact a = new QueueArtifact("artifactName");
 		IArtifact b = new QueueArtifact("dependingArtifact");
 		
 		INode na = new ArtifactNode(a);
 		ArtifactNode nb = new ArtifactNode(b);
 		
-		assertEquals(na.getUsedBy().size(), 0);
-		na.addUsedBy(nb);
+		assertEquals(na.getIncoming().size(), 0);
+		na.addIncoming(new Link(nb, na, false));
 		
-		assertEquals(na.getUsedBy().size(), 1);
-		na.addUsedBy(nb);
+		assertEquals(na.getIncoming().size(), 1);
+		na.addIncoming(new Link(nb, na, false));
 		
-		assertEquals(na.getUsedBy().size(), 1);
-		assertTrue(na.getUsedBy().contains(nb));
+		assertEquals(na.getIncoming().size(), 1);
+		assertTrue(na.usedBy(nb));
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class TestArtifactNode {
 		INode na = new ArtifactNode(a);
 		ArtifactNode nb = new ArtifactNode(b);
 		
-		na.addIUse(nb);
+		na.addOutgoing(new Link(na, nb, false));
 		assertTrue(na.uses(nb));
 		assertFalse(nb.uses(na));
 	}
@@ -89,8 +89,8 @@ public class TestArtifactNode {
 		ArtifactNode nb = new ArtifactNode(b);
 		ArtifactNode nc = new ArtifactNode(c);
 		
-		na.addIUse(nb);
-		nb.addIUse(nc);
+		na.addOutgoing(new Link(na, nb, false));
+		nb.addOutgoing(new Link(nb, nc, false));
 		
 		assertTrue(na.uses(nb));
 		assertFalse(na.usesIndirect(nb));
@@ -107,7 +107,7 @@ public class TestArtifactNode {
 		ArtifactNode na = new ArtifactNode(a);
 		INode nb = new ArtifactNode(b);
 		
-		nb.addUsedBy(na);
+		nb.addIncoming(new Link(na, nb, false));
 		assertTrue(nb.usedBy(na));
 		assertFalse(na.usedBy(nb));
 	}
@@ -122,8 +122,8 @@ public class TestArtifactNode {
 		ArtifactNode nb = new ArtifactNode(b);
 		INode nc = new ArtifactNode(c);
 		
-		nb.addUsedBy(na);
-		nc.addUsedBy(nb);
+		nb.addIncoming(new Link(na, nb, false));
+		nc.addIncoming(new Link(nb, nc, false));
 		
 		assertTrue(nb.usedBy(na));
 		assertTrue(nc.usedBy(na));
@@ -142,9 +142,9 @@ public class TestArtifactNode {
 		ArtifactNode nb = new ArtifactNode(b);
 		ArtifactNode nc = new ArtifactNode(c);
 		
-		na.addIUse(nb);
-		na.addIUse(nc);
-		nb.addIUse(nc);
+		na.addOutgoing(new Link(na, nb, false));
+		na.addOutgoing(new Link(na, nc, false));
+		nb.addOutgoing(new Link(nb, nc, false));
 		
 		assertTrue(na.uses(nb));
 		assertTrue(na.uses(nc));

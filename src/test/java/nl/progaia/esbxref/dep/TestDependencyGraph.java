@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class TestDependencyGraph {
 		IArtifact b = new QueueArtifact("someOtherQueue");
 		IArtifact c = new QueueArtifact("anotherQueue");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
 		
 		INode na = graph.getNode(a.getArchivePath());
 		INode nb = graph.getNode(b.getArchivePath());
@@ -73,8 +74,8 @@ public class TestDependencyGraph {
 		IArtifact d = new QueueArtifact("artifactd");
 		IArtifact e = new QueueArtifact("artifacte");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
-		graph.addArtifact(d, new IArtifact[] {e});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
+		graph.addArtifact(d, makeDepList(new IArtifact[] {e}));
 
 		INode na = graph.getNode(a.getArchivePath());
 		INode nb = graph.getNode(b.getArchivePath());
@@ -112,7 +113,7 @@ public class TestDependencyGraph {
 		IArtifact b = new QueueArtifact("someOtherQueue");
 		IArtifact c = new QueueArtifact("anotherQueue");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
 		
 		INode na = graph.getNode(a.getArchivePath());
 		INode nb = graph.getNode(b.getArchivePath());
@@ -134,7 +135,7 @@ public class TestDependencyGraph {
 		IArtifact b = new QueueArtifact("someOtherQueue");
 		IArtifact c = new QueueArtifact("anotherQueue");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
 		
 		File file = File.createTempFile("depgraphtest", ".xref");
 		graph.save(file);
@@ -163,8 +164,8 @@ public class TestDependencyGraph {
 		IArtifact d = new QueueArtifact("artifactd");
 		IArtifact e = new QueueArtifact("artifacte");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
-		graph.addArtifact(d, new IArtifact[] {e});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
+		graph.addArtifact(d, makeDepList(new IArtifact[] {e}));
 		
 		List<INode> unusedNodes = graph.findUnused();
 		assertEquals(2, unusedNodes.size());
@@ -182,8 +183,8 @@ public class TestDependencyGraph {
 		IArtifact d = new QueueArtifact("artifactd");
 		IArtifact e = new QueueArtifact("artifacte");
 		
-		graph.addArtifact(a, new IArtifact[] {b, c});
-		graph.addArtifact(d, new IArtifact[] {e});
+		graph.addArtifact(a, makeDepList(new IArtifact[] {b, c}));
+		graph.addArtifact(d, makeDepList(new IArtifact[] {e}));
 		
 		List<INode> unusedNodes = graph.findAllUnused();
 		assertEquals(5, unusedNodes.size());
@@ -195,5 +196,12 @@ public class TestDependencyGraph {
 		assertEquals(2, unusedNodes.size());
 		assertTrue(unusedNodes.contains(graph.getNode(a.getArchivePath())));
 		assertTrue(unusedNodes.contains(graph.getNode(c.getArchivePath())));
+	}
+	
+	private static List<Dependency> makeDepList(IArtifact[] artifacts) {
+		List<Dependency> deps = new ArrayList<Dependency>();
+		for(IArtifact a: artifacts)
+			deps.add(new Dependency(a, false));
+		return deps;
 	}
 }

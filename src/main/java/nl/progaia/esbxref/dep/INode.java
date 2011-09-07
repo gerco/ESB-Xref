@@ -8,17 +8,21 @@ public interface INode extends Comparable<INode>{
 
 	public abstract String getPath();
 
-	public abstract void addIUse(INode other);
+	public abstract void addOutgoing(Link link);
 	
-	public abstract boolean removeIUse(INode node);
+	public abstract boolean removeOutgoing(Link link);
 
-	public abstract List<INode> getIUse();
-
-	public abstract void addUsedBy(INode node);
-
-	public abstract boolean removeUsedBy(INode node);
+	public abstract List<Link> getOutgoing();
 	
-	public abstract List<INode> getUsedBy();
+	public abstract List<INode> getOutgoingTargets();
+
+	public abstract void addIncoming(Link link);
+
+	public abstract boolean removeIncoming(Link link);
+	
+	public abstract List<Link> getIncoming();
+	
+	public abstract List<INode> getIncomingSources();
 
 	public abstract boolean uses(INode other);
 
@@ -28,6 +32,8 @@ public interface INode extends Comparable<INode>{
 
 	public abstract boolean usedByIndirect(INode other);
 
+	public abstract boolean unusedByAll(List<INode> result);
+	
 	public abstract void compressLinks();
 
 	public abstract boolean equals(Object other);

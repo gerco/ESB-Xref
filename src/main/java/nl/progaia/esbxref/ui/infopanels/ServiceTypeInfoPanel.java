@@ -22,14 +22,12 @@ import nl.progaia.esb.ParamsType.XmlParam;
 import nl.progaia.esb.Service.ExitEndpointList;
 import nl.progaia.esbxref.dep.ArtifactNode;
 
-public class ServiceInfoPanel extends JPanel {
-	
-	
+public class ServiceTypeInfoPanel extends JPanel {
 	private JAXBContext jaxb;
 	private Unmarshaller unmarshaller;
 	private DefaultTableModel tableModel = new DefaultTableModel();
 	
-	public ServiceInfoPanel() {
+	public ServiceTypeInfoPanel() {
 		tableModel.setColumnCount(2);
 		tableModel.setColumnIdentifiers(new Object[] {"Name", "Value"});
 		JTable table = new JTable();
@@ -46,26 +44,36 @@ public class ServiceInfoPanel extends JPanel {
 		}
 	}
 	
-	public void setService(ArtifactNode node) {
+	public void setServiceType(ArtifactNode node) {
 		tableModel.setRowCount(0);
 		String xml = node.getArtifactXml();
 		try {
-			Service service = (Service) unmarshaller.unmarshal(new StringReader(xml));
+			ServiceType service = (ServiceType) unmarshaller.unmarshal(new StringReader(xml));
 			tableModel.addRow(new Object[] {"Service name", service.getName()});
-			tableModel.addRow(new Object[] {"Service type", service.getTypeRef()});
-			tableModel.addRow(new Object[] {"Entry endpoint", service.getEntryRef()});
-			tableModel.addRow(new Object[] {"Exit endpoints", getExitEndpoints(service)});
-			tableModel.addRow(new Object[] {"Fault endpoint", getEndpointRef(service.getFaultEndpoint())});
-			tableModel.addRow(new Object[] {"RME endpoint", getEndpointRef(service.getRejectEndpoint())});
-			List<Object> params = service.getParams().getStringParamOrXmlParam();
-			for(Object param: params) {
-				if(param instanceof StringParam) {
-					StringParam p = (StringParam)param;
-					tableModel.addRow(new Object[] {p.getName(), p.getValue()});
+			{
+				List<Object> params = service.getValidParams().getInit().getStringParamOrXmlParam();
+				for(Object param: params) {
+					if(param instanceof StringParam) {
+						StringParam p = (StringParam)param;
+						tableModel.addRow(new Object[] {p.getName(), p.getValue()});
+					}
+					else if(param instanceof XmlParam) {
+						XmlParam p = (XmlParam)param;
+						tableModel.addRow(new Object[] {p.getName(), "--- Xml params not yet supported ---"});
+					}
 				}
-				else if(param instanceof XmlParam) {
-					XmlParam p = (XmlParam)param;
-					tableModel.addRow(new Object[] {p.getName(), "--- Xml params not yet supported ---"});
+			}
+			{
+				List<Object> params = service.getValidParams().getRuntime().getStringParamOrXmlParam();
+				for(Object param: params) {
+					if(param instanceof StringParam) {
+						StringParam p = (StringParam)param;
+						tableModel.addRow(new Object[] {p.getName(), p.getValue()});
+					}
+					else if(param instanceof XmlParam) {
+						XmlParam p = (XmlParam)param;
+						tableModel.addRow(new Object[] {p.getName(), "--- Xml params not yet supported ---"});
+					}
 				}
 			}
 		} catch (JAXBException e) {
@@ -93,5 +101,4 @@ public class ServiceInfoPanel extends JPanel {
 		
 		return "";
 	}
-		
 }

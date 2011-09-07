@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -66,7 +67,7 @@ public class DependencyGraph implements Serializable {
 	 * @param artifact
 	 * @param dependencies
 	 */
-	public INode addArtifact(IArtifact artifact, IArtifact[] dependencies) {
+	public INode addArtifact(IArtifact artifact, List<Dependency> dependencies) {
 		if(artifact == null)
 			throw new IllegalArgumentException("Artifact must not be null");
 
@@ -76,20 +77,28 @@ public class DependencyGraph implements Serializable {
 		
 		INode node = addArtifactInternal(artifact);
 		
-		for(IArtifact dep: dependencies) {
+		for(Dependency dep: dependencies) {
 			// Find the node if it already exists, create otherwise
-			INode depNode = nodes.get(dep.getArchivePath());
+			INode depNode = nodes.get(dep.artifact.getArchivePath());
 			if(depNode == null) {
-				depNode = addArtifactInternal(dep);
+				depNode = addArtifactInternal(dep.artifact);
 			}
 			
 			// Add the links to the parent and dependent node
-//			System.out.println("Linking " + node + " and " + depNode);
-			node.addIUse(depNode);
-			depNode.addUsedBy(node);
+			// The traversal API will return the node itself as a depencency, do not link the node
+			// to itself to prevent cycles in the graph.
+			if(node != depNode) {
+				Link link = new Link(node, depNode, dep.hard);
+				node.addOutgoing(link);
+				depNode.addIncoming(link);
+			}
 		}
 		
 		return node;
+	}
+
+	public boolean containsPath(String path) {
+		return nodes.containsKey(path);
 	}
 	
 	/**
@@ -99,32 +108,51 @@ public class DependencyGraph implements Serializable {
 	 * @param secondary
 	 */
 	public void mergeNodes(INode primary, INode secondary) {
-		// Link all nodes that the secondary node uses to the primary
-		for(INode node: secondary.getIUse()) {
+		// Create new links between all nodes the secondary has outgoing links to and the primary
+		for(Link link: secondary.getOutgoing()) {
+			INode targetNode = link.getTarget();
+			
+			Link newLink = new Link(primary, targetNode, link.isHard());
+			
 			// Link the node to the primary node
-			primary.addIUse(node);
-			node.addUsedBy(primary);
+			primary.addOutgoing(newLink);
+			targetNode.addIncoming(newLink);
 			
 			// Unlink the node from the secondary node
-			node.removeUsedBy(secondary);
+			targetNode.removeIncoming(link);
 		}
 		
-		// Link all nodes that use the secondary node to the primary
-		for(INode node: secondary.getUsedBy()) {
+		// Create new links between all nodes that have links to the secondary to the primary
+		for(Link link: secondary.getIncoming()) {
+			INode sourceNode = link.getSource();
+			Link newLink = new Link(sourceNode, primary, link.isHard());
+			
 			// Link the primary node to the node
-			primary.addUsedBy(node);
-			node.addIUse(primary);
+			primary.addIncoming(newLink);
+			sourceNode.addOutgoing(newLink);
 			
 			// Unlink the secondary node from the node
-			node.removeIUse(secondary);
+			sourceNode.removeOutgoing(link);
 		}
 		
 		// Break any links between the primary and secondary node
-		primary.removeIUse(secondary);
-		primary.removeUsedBy(secondary);
+		unlinkNodes(primary, secondary);
 		
 		// Remove the secondary node from the graph
 		nodes.remove(secondary.getPath());
+	}
+
+	private void unlinkNodes(INode primary, INode secondary) {
+		for(Iterator<Link> it = primary.getOutgoing().iterator(); it.hasNext();) {
+			Link link = it.next();
+			if(link.getTarget() == secondary)
+				it.remove();
+		}
+		for(Iterator<Link> it = primary.getIncoming().iterator(); it.hasNext();) {
+			Link link = it.next();
+			if(link.getSource() == secondary)
+				it.remove();
+		}
 	}
 	
 	/**
@@ -154,11 +182,11 @@ public class DependencyGraph implements Serializable {
 			throw new IllegalArgumentException("Node must not be null");
 		
 		if(topLevel) {
-			rootNode.addIUse(node);
-			node.addUsedBy(rootNode);
+			Link link = new Link(rootNode, node, false);
+			rootNode.addOutgoing(link);
+			node.addIncoming(link);
 		} else {
-			rootNode.removeIUse(node);
-			node.removeUsedBy(rootNode);
+			unlinkNodes(rootNode, node);
 		}
 	}
 	
@@ -211,13 +239,13 @@ public class DependencyGraph implements Serializable {
 			INode n = nodes.get(path);
 			
 			w.println("<h3>Uses</h3>");
-			for(INode dep: sortList(n.getIUse())) {
-				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
+			for(Link link: sortList(n.getOutgoing())) {
+				w.println("<a href=\"#" + link.getTarget().getPath().replace('/', '_') + "\">" + link.getTarget().getPath() + "</a><br>");
 			}
 			
 			w.println("<h3>Used by</h3>");
-			for(INode dep: sortList(n.getUsedBy())) {
-				w.println("<a href=\"#" + dep.getPath().replace('/', '_') + "\">" + dep.getPath() + "</a><br>");
+			for(Link link: sortList(n.getIncoming())) {
+				w.println("<a href=\"#" + link.getSource().getPath().replace('/', '_') + "\">" + link.getSource().getPath() + "</a><br>");
 			}
 		}
 				
@@ -230,7 +258,8 @@ public class DependencyGraph implements Serializable {
 		PrintWriter w = new PrintWriter(new FileWriter(file));
 
 		for(String path: nodes.keySet()) {
-			for(INode n: nodes.get(path).getIUse()) {
+			for(Link l: nodes.get(path).getOutgoing()) {
+				INode n = l.getTarget();
 				w.print(path);
 				w.print(";");
 				w.print(n.getPath());
@@ -253,8 +282,8 @@ public class DependencyGraph implements Serializable {
 		int numOrphans = 0;
 		
 		for(INode n: nodes.values()) {
-			numLinks += n.getIUse().size() + n.getUsedBy().size();
-			if(n.getUsedBy().size() == 0)
+			numLinks += n.getOutgoing().size() + n.getIncoming().size();
+			if(n.getIncoming().size() == 0)
 				numOrphans++;
 		}
 		
@@ -271,7 +300,7 @@ public class DependencyGraph implements Serializable {
 		List<INode> result = new ArrayList<INode>();
 		
 		for(INode n: getAllNodes()) {
-			if(n.getUsedBy().size()==0)
+			if(n.getIncoming().size()==0)
 				result.add(n);
 		}
 		
@@ -296,22 +325,19 @@ public class DependencyGraph implements Serializable {
 	 * @return A List<Node> with all unused nodes and their exclusive dependencies.
 	 */
 	public List<INode> findAllUnused(List<INode> unusedNodes) {
-//		System.out.println("Unused nodes: " + unusedNodes);
 		List<INode> result = new ArrayList<INode>(unusedNodes);
-		
+
 		for(INode n: nodes.values()) {
-			if(result.contains(n))
-				continue;
-			
-			if(unusedNodes.containsAll(n.getUsedBy())) {
+			if(!result.contains(n) && n.unusedByAll(result))
 				result.add(n);
-			}
 		}
-		
+
+		// If we didn't add any more nodes in this pass, we're done. Otherwise, do another pass.
 		if(result.size() == unusedNodes.size()) {
 			return result;
 		} else {
 			return findAllUnused(result);
 		}
 	}
+	
 }

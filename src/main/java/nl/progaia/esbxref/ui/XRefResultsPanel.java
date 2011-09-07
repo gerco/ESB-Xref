@@ -14,18 +14,21 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 
-import com.sonicsw.deploy.artifact.ESBArtifact;
-
 import nl.progaia.esbprocessdraw.ProcessRenderer;
 import nl.progaia.esbprocessdraw.draw.esb.ESBProcess;
 import nl.progaia.esbxref.dep.ArtifactNode;
 import nl.progaia.esbxref.dep.INode;
 import nl.progaia.esbxref.task.Task;
 import nl.progaia.esbxref.task.TaskExecutor;
+import nl.progaia.esbxref.ui.infopanels.ConnectionInfoPanel;
+import nl.progaia.esbxref.ui.infopanels.ContainerInfoPanel;
 import nl.progaia.esbxref.ui.infopanels.EndpointInfoPanel;
 import nl.progaia.esbxref.ui.infopanels.GenericInfoPanel;
 import nl.progaia.esbxref.ui.infopanels.ProcessInfoPanel;
 import nl.progaia.esbxref.ui.infopanels.ServiceInfoPanel;
+import nl.progaia.esbxref.ui.infopanels.ServiceTypeInfoPanel;
+
+import com.sonicsw.deploy.artifact.ESBArtifact;
 
 public class XRefResultsPanel extends JPanel {
 	private JTable usesTable;
@@ -34,8 +37,11 @@ public class XRefResultsPanel extends JPanel {
 	private JPanel infoPanel;
 	private GenericInfoPanel genericInfoPanel = new GenericInfoPanel();
 	private ProcessInfoPanel processInfoPanel = new ProcessInfoPanel();
+	private ConnectionInfoPanel connectionInfoPanel = new ConnectionInfoPanel();
+	private ContainerInfoPanel containerInfoPanel = new ContainerInfoPanel();
 	private EndpointInfoPanel endpointInfoPanel = new EndpointInfoPanel();
 	private ServiceInfoPanel serviceInfoPanel = new ServiceInfoPanel();
+	private ServiceTypeInfoPanel serviceTypeInfoPanel = new ServiceTypeInfoPanel();
 	
 	private NodeListTableModel usesTableModel;
 	private NodeListTableModel whereUsedTableModel;
@@ -91,9 +97,9 @@ public class XRefResultsPanel extends JPanel {
 		}
 		
 		tabbedPane.setEnabledAt(1, true);
-		usesTableModel.setData(displayedNode.getIUse());
+		usesTableModel.setData(displayedNode.getOutgoingTargets());
 		tabbedPane.setEnabledAt(2, true);
-		whereUsedTableModel.setData(displayedNode.getUsedBy());
+		whereUsedTableModel.setData(displayedNode.getIncomingSources());
 
 		if(displayedNode instanceof ArtifactNode) {
 			final ArtifactNode artifactNode = (ArtifactNode)displayedNode;
@@ -117,12 +123,21 @@ public class XRefResultsPanel extends JPanel {
 					}
 				};
 				worker.execute(t);
+			} else if(artifactNode.getPath().startsWith(ESBArtifact.CONNECTION.getArchivePath())) {
+				connectionInfoPanel.setConnection(artifactNode);
+				setInfoComponent(connectionInfoPanel);
+			} else if(artifactNode.getPath().startsWith(ESBArtifact.CONTAINER.getArchivePath())) {
+				containerInfoPanel.setContainer(artifactNode);
+				setInfoComponent(containerInfoPanel);
 			} else if(artifactNode.getPath().startsWith(ESBArtifact.ENDPOINT.getArchivePath())) {
 				endpointInfoPanel.setEndpoint(artifactNode);
 				setInfoComponent(endpointInfoPanel);
 			} else if(artifactNode.getPath().startsWith(ESBArtifact.SERVICE.getArchivePath())) {
 				serviceInfoPanel.setService(artifactNode);
 				setInfoComponent(serviceInfoPanel);
+			} else if(artifactNode.getPath().startsWith(ESBArtifact.SERVICE_TYPE.getArchivePath())) {
+				serviceTypeInfoPanel.setServiceType(artifactNode);
+				setInfoComponent(serviceTypeInfoPanel);
 			} else {
 				genericInfoPanel.setNode(artifactNode);
 				setInfoComponent(genericInfoPanel);

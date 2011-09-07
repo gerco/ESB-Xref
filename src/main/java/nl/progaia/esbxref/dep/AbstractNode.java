@@ -6,14 +6,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class AbstractNode implements INode, Serializable {
+public abstract class AbstractNode implements INode, Serializable {
 	public static final long serialVersionUID = 1;
 	
 	private final String name;
 	private final String path;
 	
-	private final List<INode> iUse = new ArrayList<INode>();
-	private final List<INode> usedBy = new ArrayList<INode>();
+	private final List<Link> outgoingLinks = new ArrayList<Link>();
+	private final List<Link> incomingLinks = new ArrayList<Link>();
 
 	public AbstractNode(final String name, final String path) {
 		this.name = name;
@@ -37,66 +37,84 @@ public class AbstractNode implements INode, Serializable {
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#addIUse(nl.progaia.esbxref.dep.INode)
 	 */
-	public void addIUse(INode other) {
-		if(other.equals(this))
-			return;
+	public void addOutgoing(Link link) {
+		assert link.getTarget() != this;
+		assert link.getSource() == this;
 			
-		if(!iUse.contains(other)) {
-			iUse.add(other);
-//			System.out.println(getPath() + " uses " + other.getPath());
+		if(!outgoingLinks.contains(link)) {
+			outgoingLinks.add(link);
 		}
 	}
 	
-	public boolean removeIUse(INode other) {
-		return iUse.remove(other);
+	public boolean removeOutgoing(Link link) {
+		return outgoingLinks.remove(link);
 	}
 	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#getIUse()
 	 */
-	public List<INode> getIUse() {
-		return Collections.unmodifiableList(iUse);
+	public List<Link> getOutgoing() {
+		return Collections.unmodifiableList(outgoingLinks);
 	}
-
+	
+	public List<INode> getOutgoingTargets() {
+		List<INode> result = new ArrayList<INode>();
+		for(Link l: outgoingLinks)
+			result.add(l.getTarget());
+		return Collections.unmodifiableList(result);
+	}
+	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#addUsedBy(nl.progaia.esbxref.dep.INode)
 	 */
-	public void addUsedBy(INode other) {
-		if(other.equals(this))
-			return;
+	public void addIncoming(Link link) {
+		assert link.getTarget() == this;
+		assert link.getSource() != this;
 		
-		if(!usedBy.contains(other)) {
-			usedBy.add(other);
-//			System.out.println(getPath() + " is used by " + other.getPath());
+		if(!incomingLinks.contains(link)) {
+			incomingLinks.add(link);
 		}
 	}
 	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#getUsedBy()
 	 */
-	public List<INode> getUsedBy() {
-		return Collections.unmodifiableList(usedBy);
+	public List<Link> getIncoming() {
+		return Collections.unmodifiableList(incomingLinks);
 	}
 	
-	public boolean removeUsedBy(INode other) {
-		return usedBy.remove(other);
+	public List<INode> getIncomingSources() {
+		List<INode> result = new ArrayList<INode>();
+		for(Link l: incomingLinks)
+			result.add(l.getSource());
+		return Collections.unmodifiableList(result);
+	}
+	
+	public boolean removeIncoming(Link link) {
+		return incomingLinks.remove(link);
 	}
 	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#uses(nl.progaia.esbxref.dep.INode)
 	 */
 	public boolean uses(INode other) {
-		return iUse.contains(other) || usesIndirect(other);
+//		System.out.println(this.getPath() + " uses(" + other.getPath() + ")");
+		for(Link l: outgoingLinks) {
+			if(l.getTarget() == other)
+				return true;
+		}
+		
+		return usesIndirect(other);
 	}
 	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#usesIndirect(nl.progaia.esbxref.dep.INode)
 	 */
 	public boolean usesIndirect(INode other) {
-		for(INode n: iUse) {
-			if(n.uses(other))
+//		System.out.println(this.getPath() + " usesIndirect(" + other.getPath() + ")");
+		for(Link l: outgoingLinks)
+			if(l.getTarget().uses(other))
 				return true;
-		}
 		
 		return false;
 	}
@@ -105,41 +123,54 @@ public class AbstractNode implements INode, Serializable {
 	 * @see nl.progaia.esbxref.dep.INode#usedBy(nl.progaia.esbxref.dep.INode)
 	 */
 	public boolean usedBy(INode other) {
-		return usedBy.contains(other) || usedByIndirect(other);
+		for(Link l: incomingLinks)
+			if(l.getSource() == other)
+				return true;
+		
+		return usedByIndirect(other);
 	}
 	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#usedByIndirect(nl.progaia.esbxref.dep.INode)
 	 */
 	public boolean usedByIndirect(INode other) {
-		for(INode n: usedBy) {
-			if(n.usedBy(other))
+		for(Link l: incomingLinks) {
+			if(l.getSource().usedBy(other))
 				return true;
 		}
 		
 		return false;
 	}
 	
+	public boolean unusedByAll(List<INode> nodes) {
+		for(Link l: incomingLinks)
+			if(!nodes.contains(l.getSource()))
+				return false;
+		return true;
+	}
+	
 	/* (non-Javadoc)
 	 * @see nl.progaia.esbxref.dep.INode#compressLinks()
 	 */
 	public void compressLinks() {
-		// Compress uses links
-		for(Iterator<INode> it = iUse.iterator(); it.hasNext();) {
-			INode directlyLinkedNode = it.next();
+		// Compress outgoing links
+		for(Iterator<Link> it = outgoingLinks.iterator(); it.hasNext();) {
+			Link directLink = it.next();
+			if(directLink.isHard())
+				continue;
 			
-			if(usesIndirect(directlyLinkedNode)) {
+			if(usesIndirect(directLink.getTarget()))
 				it.remove();
-			}
 		}
 		
-		// Compress usedby links
-		for(Iterator<INode> it = usedBy.iterator(); it.hasNext();) {
-			INode directlyLinkedNode = it.next();
+		// Compress incoming links
+		for(Iterator<Link> it = incomingLinks.iterator(); it.hasNext();) {
+			Link directLink = it.next();
+			if(directLink.isHard())
+				continue;
 			
-			if(usedByIndirect(directlyLinkedNode)) {
+			if(usedByIndirect(directLink.getSource()))
 				it.remove();
-			}
 		}
 	}
 	

@@ -33,7 +33,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<schemaFiles>process.xsd,endpoint.xsd,service.xsd,serviceType.xsd,xqContainer.xsd</schemaFiles>
+					<schemaFiles>connection.xsd,process.xsd,endpoint.xsd,service.xsd,serviceType.xsd,xqContainer.xsd</schemaFiles>
 					<packageName>nl.progaia.esb</packageName>
 				</configuration>
 			</plugin>
