@@ -130,10 +130,6 @@ public class AnalyzeArtifactStoreTask extends Task implements CancelableTask {
 		if(analyzed.contains(root))
 			return;
 		
-		if(root.getName().equals("ba.sip.esb.car.FlightCargoLoadV01")) {
-			System.out.println();
-		}
-		
 		analyzed.add(root);
 		
 		// Get dependent artifacts from the traversers and deep analysis

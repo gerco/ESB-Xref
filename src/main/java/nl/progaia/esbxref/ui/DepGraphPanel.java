@@ -216,10 +216,9 @@ public class DepGraphPanel extends JPanel {
 	}
 	
 	private class ArtifactTreeCellRenderer extends DefaultTreeCellRenderer {
-		
 		// ESB Icons
 		private ImageIcon ICON_CONTAINER = 
-			new ImageIcon(getClass().getResource("icons/container.gif"));
+			new ImageIcon(getClass().getResource("icons/XQ_CONTAINER.gif"));
 		private ImageIcon ICON_ESBP = 
 			new ImageIcon(getClass().getResource("icons/esbp.gif"));
 		private ImageIcon ICON_ESBSTYP = 
@@ -248,7 +247,8 @@ public class DepGraphPanel extends JPanel {
 		private ImageIcon ICON_FILE = 
 			new ImageIcon(getClass().getResource("icons/file.gif"));
 		
-        public Component getTreeCellRendererComponent(
+        @Override
+		public Component getTreeCellRendererComponent(
         		JTree tree, Object value, boolean sel, boolean expanded,
                 boolean leaf, int row, boolean hasFocus) {
 

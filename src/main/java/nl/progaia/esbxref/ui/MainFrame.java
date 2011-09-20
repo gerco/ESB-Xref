@@ -55,7 +55,7 @@ public class MainFrame extends JFrame {
 	private JSplitPane splitPane;
 	private DepGraphPanel graphPanel;
 	private XRefResultsPanel resultsPanel;
-//	private HistoryPanel historyPanel;
+	private HistoryPanel historyPanel;
 
 	private File currentFile;
 	private String currentFilename;
@@ -105,7 +105,7 @@ public class MainFrame extends JFrame {
 		getContentPane().setLayout(new BorderLayout());
 		setJMenuBar(initMenuBar());
 		
-//		getContentPane().add(initHistoryPanel(), BorderLayout.NORTH);
+		getContentPane().add(initHistoryPanel(), BorderLayout.NORTH);
 		
 		splitPane = new JSplitPane();
 		splitPane.setLeftComponent(initDepGraphView());
@@ -117,10 +117,10 @@ public class MainFrame extends JFrame {
 		getContentPane().add(initStatusBar(), BorderLayout.SOUTH);
 	}
 
-//	private HistoryPanel initHistoryPanel() {
-//		historyPanel = new HistoryPanel();
-//		return historyPanel;
-//	}
+	private HistoryPanel initHistoryPanel() {
+		historyPanel = new HistoryPanel();
+		return historyPanel;
+	}
 
 	private XRefResultsPanel initResultsPanel() {
 		resultsPanel = new XRefResultsPanel(worker);
@@ -141,8 +141,8 @@ public class MainFrame extends JFrame {
 				if(resultsPanel != null)
 					resultsPanel.setDisplayedNode(selectedNode);
 				
-//				if(historyPanel != null)
-//					historyPanel.addHistoryNode(selectedNode);
+				if(historyPanel != null)
+					historyPanel.addHistoryNode(selectedNode);
 			}
 		});
 		return graphPanel;

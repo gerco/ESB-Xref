@@ -23,8 +23,6 @@ import nl.progaia.esb.Service.ExitEndpointList;
 import nl.progaia.esbxref.dep.ArtifactNode;
 
 public class ServiceInfoPanel extends JPanel {
-	
-	
 	private JAXBContext jaxb;
 	private Unmarshaller unmarshaller;
 	private DefaultTableModel tableModel = new DefaultTableModel();
@@ -39,7 +37,7 @@ public class ServiceInfoPanel extends JPanel {
 			BorderLayout.CENTER);
 		
 		try {
-			jaxb = JAXBContext.newInstance(EndpointSchemaType.class);
+			jaxb = JAXBContext.newInstance(Service.class);
 			unmarshaller = jaxb.createUnmarshaller();
 		} catch (JAXBException e) {
 			throw new RuntimeException(e);
